@@ -5,6 +5,7 @@ import os
 import random
 import shutil
 import time
+import urllib.request
 from janome.tokenizer import Tokenizer
 from PIL import Image, ImageDraw, ImageFont
 from playwright.sync_api import sync_playwright
@@ -18,6 +19,22 @@ st.set_page_config(
     page_icon="❄️",
     layout="centered",
 )
+
+
+# -------------------------------------------------------------
+# ★ 日本語フォント取得関数（文字化け対策）
+# -------------------------------------------------------------
+@st.cache_resource
+def get_japanese_font():
+    font_path = "NotoSansJP-Bold.ttf"
+    if not os.path.exists(font_path):
+        # Google Fontsの日本語対応フォントを自動ダウンロード
+        url = "https://github.com/google/fonts/raw/main/ofl/notosansjp/NotoSansJP-Bold.ttf"
+        try:
+            urllib.request.urlretrieve(url, font_path)
+        except Exception:
+            return None
+    return font_path
 
 
 # -------------------------------------------------------------
@@ -361,11 +378,10 @@ def generate_nickname(comments):
 
 
 # -------------------------------------------------------------
-# ★ 名刺画像生成関数 (Pillow)
+# ★ 名刺画像生成関数 (日本語フォント読み込み対応)
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words):
     width, height = 1000, 560
-    # ダークネイビー〜ブルー系のシックなグラデーション風背景
     img = Image.new("RGB", (width, height), color=(15, 23, 42))
     draw = ImageDraw.Draw(img)
 
@@ -377,23 +393,30 @@ def create_card_image(author_name, title, top_words):
         [26, 26, width - 26, height - 26], outline=(148, 163, 184), width=1
     )
 
-    # フォントの設定（Linux標準フォントを使用）
-    font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-    if not os.path.exists(font_path):
-        font_path = None
+    font_path = get_japanese_font()
 
     try:
-        font_title = (
-            ImageFont.truetype(font_path, 36)
+        font_header = (
+            ImageFont.truetype(font_path, 22)
             if font_path
             else ImageFont.load_default()
         )
         font_author = (
-            ImageFont.truetype(font_path, 28)
+            ImageFont.truetype(font_path, 32)
             if font_path
             else ImageFont.load_default()
         )
-        font_body = (
+        font_title = (
+            ImageFont.truetype(font_path, 34)
+            if font_path
+            else ImageFont.load_default()
+        )
+        font_rank_head = (
+            ImageFont.truetype(font_path, 24)
+            if font_path
+            else ImageFont.load_default()
+        )
+        font_rank_item = (
             ImageFont.truetype(font_path, 22)
             if font_path
             else ImageFont.load_default()
@@ -404,34 +427,36 @@ def create_card_image(author_name, title, top_words):
             else ImageFont.load_default()
         )
     except Exception:
-        font_title = font_author = font_body = font_footer = (
-            ImageFont.load_default()
-        )
+        font_header = font_author = font_title = font_rank_head = (
+            font_rank_item
+        ) = font_footer = ImageFont.load_default()
 
     # ヘッダーテキスト
-    draw.text((50, 45), "❄️ うつログ 獲得称号名刺", fill=(148, 163, 184))
-    draw.text((50, 95), f"投稿者: {author_name}", fill=(248, 250, 252))
+    draw.text((50, 45), "うつログ 獲得称号名刺", fill=(148, 163, 184), font=font_header)
+    draw.text((50, 85), f"投稿者: {author_name}", fill=(248, 250, 252), font=font_author)
 
     # 二つ名（赤枠アクセント）
-    draw.rectangle([50, 150, width - 50, 240], fill=(30, 41, 59))
-    draw.text((70, 172), title, fill=(244, 63, 94))
+    draw.rectangle([50, 145, width - 50, 235], fill=(30, 41, 59))
+    draw.text((70, 168), title, fill=(244, 63, 94), font=font_title)
 
-    # 特徴的単語Top 5
-    draw.text((50, 270), "📊 特徴的な名詞ランキング", fill=(226, 232, 240))
-    y_pos = 315
+    # 特徴的単語Top 3
+    draw.text((50, 265), "📊 特徴的な名詞ランキング", fill=(226, 232, 240), font=font_rank_head)
+    y_pos = 310
     for idx, (word, count) in enumerate(top_words[:3], 1):
         draw.text(
             (70, y_pos),
             f"第 {idx} 位:  {word}  ({count} 回)",
             fill=(203, 213, 225),
+            font=font_rank_item,
         )
-        y_pos += 45
+        y_pos += 42
 
     # フッター
     draw.text(
         (50, 490),
         "#うつログ二つ名ジェネレーター  |  氷室うつろ非公式ファンツール",
         fill=(100, 116, 139),
+        font=font_footer,
     )
 
     buf = io.BytesIO()
@@ -496,16 +521,24 @@ if generate_btn:
 
             st.markdown("---")
 
-            # ★ 名刺画像生成 ＆ ダウンロード ＆ X投稿エリア
-            st.subheader("🎴 名刺画像の作成・X（Twitter）共有")
+            # ★ 名刺画像プレビュー ＆ ダウンロード ＆ X投稿エリア
+            st.subheader("🎴 獲得称号名刺")
 
+            # 名刺画像の生成
             img_bytes = create_card_image(target_author, title, top_words)
+
+            # 画面上に名刺画像をプレビュー表示！
+            st.image(
+                img_bytes, caption="生成された称号名刺カード", use_column_width=True
+            )
+
+            st.write("")
 
             btn_col1, btn_col2 = st.columns([1, 1])
 
             with btn_col1:
                 st.download_button(
-                    label="🎴 名刺画像をダウンロード",
+                    label="💾 名刺画像を保存する",
                     data=img_bytes,
                     file_name=f"utsulog_card_{target_author}.png",
                     mime="image/png",
@@ -513,15 +546,13 @@ if generate_btn:
                 )
 
             with btn_col2:
-                # X（Twitter）投稿リンク用テキストの作成
+                import urllib.parse
+
                 tweet_text = (
                     f"{target_author} の獲得称号は…\n\n"
                     f"✨ {title} ✨\n\n"
                     f"#うつログ二つ名ジェネレーター #氷室うつろ\n"
                 )
-                encoded_tweet = base64.b64encode(tweet_text.encode()).decode()
-                import urllib.parse
-
                 tweet_url = f"https://twitter.com/intent/tweet?text={urllib.parse.quote(tweet_text)}"
 
                 st.markdown(
