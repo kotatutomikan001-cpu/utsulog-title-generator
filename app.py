@@ -261,7 +261,7 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（「美樹原」「お姉ちゃん」などの表記補正対応）
+# 3. 称号生成関数
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
@@ -389,7 +389,7 @@ def generate_nickname(comments):
             f"【雪月花を統べし{top1}と{top2}の絶対神】",
             f"【銀世界に降臨せし{top1}と{top2}の創世主】",
             f"【凍てつく世界を統べる{top1}と{top2}の支配者】",
-            f"【氷の結晶が導く{top1}と{top2}の全知全能】",
+            f"【氷の結晶が導く{top1}と{top2}の全知全能の超越者】",  # 修正箇所
         ]
     elif count1 >= 30:
         templates = [
