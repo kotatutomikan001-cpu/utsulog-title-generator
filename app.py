@@ -6,7 +6,6 @@ import random
 import shutil
 import time
 import urllib.parse
-import urllib.request
 from janome.tokenizer import Tokenizer
 from PIL import Image, ImageDraw, ImageFont
 from playwright.sync_api import sync_playwright
@@ -23,18 +22,25 @@ st.set_page_config(
 
 
 # -------------------------------------------------------------
-# ★ 日本語フォント取得関数（文字化け対策）
+# ★ 日本語フォント取得関数（確実なシステムフォント巡回）
 # -------------------------------------------------------------
-@st.cache_resource
 def get_japanese_font():
-    font_path = "NotoSansJP-Bold.ttf"
-    if not os.path.exists(font_path):
-        url = "https://github.com/google/fonts/raw/main/ofl/notosansjp/NotoSansJP-Bold.ttf"
-        try:
-            urllib.request.urlretrieve(url, font_path)
-        except Exception:
-            return None
-    return font_path
+    # 候補となる日本語フォントのパスリスト (Linux / Windows)
+    font_candidates = [
+        "NotoSansJP-Bold.ttf",  # リポジトリ直下に置いた場合
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "/usr/share/fonts/truetype/ipafont-gothic/ipag.ttf",
+        "/usr/share/fonts/truetype/fonts-japanese-gothic.ttf",
+        "C:\\Windows\\Fonts\\meiryo.ttc",
+        "C:\\Windows\\Fonts\\msjh.ttc",
+    ]
+
+    for path in font_candidates:
+        if os.path.exists(path):
+            return path
+
+    return None
 
 
 # -------------------------------------------------------------
@@ -378,7 +384,7 @@ def generate_nickname(comments):
 
 
 # -------------------------------------------------------------
-# ★ 名刺画像生成関数 (日本語フォント読み込み対応)
+# ★ 名刺画像生成関数
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words):
     width, height = 1000, 560
@@ -395,38 +401,15 @@ def create_card_image(author_name, title, top_words):
 
     font_path = get_japanese_font()
 
-    try:
-        font_header = (
-            ImageFont.truetype(font_path, 22)
-            if font_path
-            else ImageFont.load_default()
-        )
-        font_author = (
-            ImageFont.truetype(font_path, 32)
-            if font_path
-            else ImageFont.load_default()
-        )
-        font_title = (
-            ImageFont.truetype(font_path, 34)
-            if font_path
-            else ImageFont.load_default()
-        )
-        font_rank_head = (
-            ImageFont.truetype(font_path, 24)
-            if font_path
-            else ImageFont.load_default()
-        )
-        font_rank_item = (
-            ImageFont.truetype(font_path, 22)
-            if font_path
-            else ImageFont.load_default()
-        )
-        font_footer = (
-            ImageFont.truetype(font_path, 18)
-            if font_path
-            else ImageFont.load_default()
-        )
-    except Exception:
+    if font_path:
+        font_header = ImageFont.truetype(font_path, 22)
+        font_author = ImageFont.truetype(font_path, 32)
+        font_title = ImageFont.truetype(font_path, 34)
+        font_rank_head = ImageFont.truetype(font_path, 24)
+        font_rank_item = ImageFont.truetype(font_path, 22)
+        font_footer = ImageFont.truetype(font_path, 18)
+    else:
+        # 万が一フォントが無い場合のフォールバック
         font_header = font_author = font_title = font_rank_head = (
             font_rank_item
         ) = font_footer = ImageFont.load_default()
@@ -536,10 +519,8 @@ if generate_btn:
             # ★ 名刺画像プレビュー ＆ ダウンロード ＆ X投稿エリア
             st.subheader("🎴 獲得称号名刺")
 
-            # 名刺画像の生成
             img_bytes = create_card_image(target_author, title, top_words)
 
-            # 画面上に名刺画像をプレビュー表示！（修正箇所）
             st.image(
                 img_bytes,
                 caption="生成された称号名刺カード",
