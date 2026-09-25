@@ -22,18 +22,16 @@ st.set_page_config(
 
 
 # -------------------------------------------------------------
-# ★ 日本語フォント取得関数（確実なシステムフォント巡回）
+# ★ 日本語フォント取得関数
 # -------------------------------------------------------------
 def get_japanese_font():
-    # 候補となる日本語フォントのパスリスト (Linux / Windows)
     font_candidates = [
-        "NotoSansJP-Bold.ttf",  # リポジトリ直下に置いた場合
-        "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
         "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
         "/usr/share/fonts/truetype/ipafont-gothic/ipag.ttf",
         "/usr/share/fonts/truetype/fonts-japanese-gothic.ttf",
+        "NotoSansJP-Bold.ttf",
         "C:\\Windows\\Fonts\\meiryo.ttc",
-        "C:\\Windows\\Fonts\\msjh.ttc",
     ]
 
     for path in font_candidates:
@@ -409,7 +407,6 @@ def create_card_image(author_name, title, top_words):
         font_rank_item = ImageFont.truetype(font_path, 22)
         font_footer = ImageFont.truetype(font_path, 18)
     else:
-        # 万が一フォントが無い場合のフォールバック
         font_header = font_author = font_title = font_rank_head = (
             font_rank_item
         ) = font_footer = ImageFont.load_default()
@@ -541,12 +538,14 @@ if generate_btn:
                 )
 
             with btn_col2:
-                tweet_text = (
+                # テキスト全体のエンコード（Xバグ対策）
+                raw_tweet_text = (
                     f"{target_author} の獲得称号は…\n\n"
                     f"✨ {title} ✨\n\n"
-                    f"#うつログ二つ名ジェネレーター #氷室うつろ\n"
+                    f"#うつログ二つ名ジェネレーター #氷室うつろ"
                 )
-                tweet_url = f"https://twitter.com/intent/tweet?text={urllib.parse.quote(tweet_text)}"
+                encoded_text = urllib.parse.quote(raw_tweet_text)
+                tweet_url = f"https://x.com/intent/post?text={encoded_text}"
 
                 st.markdown(
                     f'<a href="{tweet_url}" target="_blank" class="x-share-btn" style="width: 100%; display: block; text-align: center;">𝕏 に称号をポストする</a>',
