@@ -339,8 +339,10 @@ def generate_nickname(comments):
 # -------------------------------------------------------------
 # 4. 画面上の操作UI部分
 # -------------------------------------------------------------
-target_author = st.text_input(
-    "投稿者名を入力してください", value="@hiroki_utsuro"
+input_name = st.text_input(
+    "投稿者名を入力してください（@以降のユーザー名）",
+    value="",
+    placeholder="@ユーザー名を入力",
 )
 
 col1, col2 = st.columns([1, 1])
@@ -351,7 +353,11 @@ with col1:
     )
 
 if generate_btn:
-    if target_author.strip():
+    raw_author = input_name.strip()
+    if raw_author:
+        # @がつ出ない場合は自動付与
+        target_author = raw_author if raw_author.startswith("@") else f"@{raw_author}"
+
         with st.spinner("うつログにアクセス中..."):
             comments = fetch_comments_web(target_author)
 
