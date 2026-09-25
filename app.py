@@ -280,14 +280,15 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（配信固有ワード追加＆絵文字除外フィルター搭載）
+# 3. 称号生成関数（「ゴッドハンド」「毒チワワ」追加版）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
     words = []
 
-    # ★ 優先度順のカスタム名詞（長い語や「様」「ミニ」等のパーツを含む単語を先頭に配置）
+    # ★ 優先度順のカスタム名詞（「ゴッドハンド」「毒チワワ」を追加！）
     custom_keywords = [
+        "ゴッドハンド",
         "ミニうつろ",
         "ねろんが様",
         "ねろんが",
@@ -303,6 +304,7 @@ def generate_nickname(comments):
         "一閃",
         "リアイベ",
         "オフイベ",
+        "毒チワワ",
         "カス姉",
         "涅槃",
         "CCJP",
@@ -375,24 +377,22 @@ def generate_nickname(comments):
     # ★ 絵文字・特殊記号を除外する正規表現パターン
     emoji_pattern = re.compile(
         "["
-        "\U0001f300-\U0001f9ff"  # 記号・絵文字
+        "\U0001f300-\U0001f9ff"
         "\U0001fa00-\U0001fa9f"
-        "\u2600-\u27bf"  # 雑記号・絵文字（❄️, 🖋️, 🐸等）
-        "\ufe0f"  # 異体字セレクタ
-        "\u2744"  # ❄︎ (SNOWFLAKE)
+        "\u2600-\u27bf"
+        "\ufe0f"
+        "\u2744"
         "]+",
         flags=re.UNICODE,
     )
 
     for comment in comments:
-        # 絵文字や異体字記号を消去
         working_comment = emoji_pattern.sub("", comment)
 
-        # 1. カスタム名詞の保護抽出（長い順・優先順にチェック）
+        # 1. カスタム名詞の保護抽出
         for ck in custom_keywords:
             if ck in working_comment:
                 count_ck = working_comment.count(ck)
-                # 「姉ちゃん」単体は「お姉ちゃん」に統一
                 target_word = "お姉ちゃん" if ck == "姉ちゃん" else ck
                 for _ in range(count_ck):
                     words.append(target_word)
@@ -407,7 +407,6 @@ def generate_nickname(comments):
             if pos_main == "名詞":
                 if pos_sub in allowed_subcategories or pos_sub == "*":
                     word = token.base_form
-                    # 絵文字・1文字・除外ワードのチェック
                     if (
                         len(word) > 1
                         and word not in stop_words
