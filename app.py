@@ -491,7 +491,6 @@ mode = st.radio(
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    # ★ ボタン文言を「称号を獲得する！」に変更
     generate_btn = st.button(
         "称号を獲得する！", type="primary", use_container_width=True
     )
@@ -531,7 +530,6 @@ if generate_btn:
 
             st.markdown("---")
 
-            # ★ 名刺画像プレビュー ＆ ダウンロード ＆ X投稿エリア
             st.subheader("🎴 獲得称号名刺")
 
             img_bytes = create_card_image(target_author, title, top_words)
@@ -556,7 +554,8 @@ if generate_btn:
                 )
 
             with btn_col2:
-                app_url = "https://utsulog-title-generator.streamlit.app"
+                # ★ 実際の公開URLに修正済み
+                app_url = "https://utsulog-title-generator-5vutqgq3qkeo3worwzxhs.streamlit.app"
                 raw_tweet_text = (
                     f"{target_author} の獲得称号は…\n\n"
                     f"✨ {title} ✨\n\n"
