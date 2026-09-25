@@ -175,7 +175,7 @@ st.markdown(
         <h1>❄️ うつログ称号ジェネレーター 🖋️</h1>
         <p>@から始まる投稿者名を入力してボタンを押すと、過去コメントの言葉の傾向を解析して<br>「称号」を自動生成します、どんな称号が飛び出すかな？</p>
         <div class="notice-text">
-            ※検索機能をお借りしているうつログのサーバー負荷軽減および処理時間短縮のため、解析件数を選択できるようにしています。
+            ※検索機能をお借りしているうつログのサーバー負荷軽減および処理時間短縮のため、解析件数を選択できるようにしています。（仕様上、過去コメントは最大3000件まで遡ることができます）
         </div>
     </div>
 """,
@@ -227,7 +227,7 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
             author_input.fill(author_name)
             author_input.press("Enter")
 
-            # ★ 初回アクセス時の要素レンダリング完了を最大5秒しっかり待機
+            # 初回アクセス時の要素レンダリング完了を最大5秒待機
             page.wait_for_selector("p.text-slate-700", timeout=5000)
             time.sleep(1.0)
         except Exception:
