@@ -7,7 +7,7 @@ import shutil
 import time
 import urllib.parse
 from janome.tokenizer import Tokenizer
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 from playwright.sync_api import sync_playwright
 import streamlit as st
 
@@ -154,7 +154,7 @@ set_bg_image()
 st.markdown(
     """
     <div class="header-box">
-        <h1>❄️ うつログ 二つ名自動生成ソフト 🖋️</h1>
+        <h1>❄️ うつログ二つ名ジェネレーター 🖋️</h1>
         <p>@から始まる投稿者名を入力してボタンを押すと、過去コメントの言葉の傾向を解析して<br>「二つ名」を自動生成します、どんな二つ名が飛び出すかな？</p>
         <div class="notice-text">
             ※検索機能をお借りしているうつログのサーバー負荷軽減および処理時間短縮のため、解析件数を選択できるようにしています。
@@ -382,11 +382,27 @@ def generate_nickname(comments):
 
 
 # -------------------------------------------------------------
-# ★ 名刺画像生成関数
+# ★ 名刺画像生成関数（背景画像オーバーレイ合成対応）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words):
     width, height = 1000, 560
-    img = Image.new("RGB", (width, height), color=(15, 23, 42))
+
+    # 背景画像（bg.png または bg.jpg）がある場合は読み込んでリサイズ＆ダーク合成
+    bg_file = None
+    if os.path.exists("bg.png"):
+        bg_file = "bg.png"
+    elif os.path.exists("bg.jpg"):
+        bg_file = "bg.jpg"
+
+    if bg_file:
+        bg_img = Image.open(bg_file).convert("RGBA")
+        bg_img = bg_img.resize((width, height))
+        # 暗めのオーバーレイ層（文字の視認性向上のため）
+        dark_overlay = Image.new("RGBA", (width, height), (15, 23, 42, 200))
+        img = Image.alpha_composite(bg_img, dark_overlay).convert("RGB")
+    else:
+        img = Image.new("RGB", (width, height), color=(15, 23, 42))
+
     draw = ImageDraw.Draw(img)
 
     # 枠線
@@ -413,7 +429,10 @@ def create_card_image(author_name, title, top_words):
 
     # ヘッダーテキスト
     draw.text(
-        (50, 45), "うつログ 獲得称号名刺", fill=(148, 163, 184), font=font_header
+        (50, 45),
+        "うつログ二つ名ジェネレーター",
+        fill=(148, 163, 184),
+        font=font_header,
     )
     draw.text(
         (50, 85),
@@ -538,12 +557,11 @@ if generate_btn:
                 )
 
             with btn_col2:
-                # ★ ツールのURLを自動で本文に含める設定
                 app_url = "https://utsulog-title-generator.streamlit.app"
                 raw_tweet_text = (
                     f"{target_author} の獲得称号は…\n\n"
                     f"✨ {title} ✨\n\n"
-                    f"👇 二つ名自動生成ソフトはこちら！\n"
+                    f"👇 うつログ二つ名ジェネレーターはこちら！\n"
                     f"{app_url}\n\n"
                     f"#うつログ二つ名ジェネレーター #氷室うつろ"
                 )
