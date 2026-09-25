@@ -554,8 +554,19 @@ if generate_btn:
                 )
 
             with btn_col2:
-                # ★ 実際の公開URLに修正済み
-                app_url = "https://utsulog-title-generator-5vutqgq3qkeo3worwzxhs.streamlit.app"
+                # ★ ブラウザがアクセスしている実ドメインからURLを自動生成（絶対にリンク切れしない）
+                app_url = "https://utsulog-title-generator.streamlit.app"
+                try:
+                    # Streamlitのコンテキストヘッダーから現在のホスト名を取得
+                    if hasattr(st, "context") and hasattr(
+                        st.context, "headers"
+                    ):
+                        host = st.context.headers.get("host", "")
+                        if host:
+                            app_url = f"https://{host}"
+                except Exception:
+                    pass
+
                 raw_tweet_text = (
                     f"{target_author} の獲得称号は…\n\n"
                     f"✨ {title} ✨\n\n"
