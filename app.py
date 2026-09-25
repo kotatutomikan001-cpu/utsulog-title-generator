@@ -261,13 +261,11 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（同率1位3つ以上の限定称号ロジック搭載）
+# 3. 称号生成関数（「美樹原」「お姉ちゃん」などの表記補正対応）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
     words = []
-
-    custom_keywords = ["美樹原"]
 
     stop_words = {
         "こと",
@@ -324,12 +322,20 @@ def generate_nickname(comments):
     for comment in comments:
         working_comment = comment
 
-        for ck in custom_keywords:
-            if ck in working_comment:
-                count_ck = working_comment.count(ck)
-                for _ in range(count_ck):
-                    words.append(ck)
-                working_comment = working_comment.replace(ck, "")
+        # 「美樹原」の保護抽出
+        if "美樹原" in working_comment:
+            count_ck = working_comment.count("美樹原")
+            for _ in range(count_ck):
+                words.append("美樹原")
+            working_comment = working_comment.replace("美樹原", "")
+
+        # 「お姉ちゃん」「姉ちゃん」の保護抽出および表記統一
+        for onee_key in ["お姉ちゃん", "姉ちゃん"]:
+            if onee_key in working_comment:
+                count_onee = working_comment.count(onee_key)
+                for _ in range(count_onee):
+                    words.append("お姉ちゃん")
+                working_comment = working_comment.replace(onee_key, "")
 
         for token in tokenizer.tokenize(working_comment):
             pos_details = token.part_of_speech.split(",")
@@ -352,11 +358,11 @@ def generate_nickname(comments):
     if not top_words:
         return "【静寂を愛する雪原の通行人】", top_words
 
-    # ★ 同率1位の判定処理
+    # 同率1位の判定処理
     max_count = top_words[0][1]
     top_tier_words = [word for word, count in top_words if count == max_count]
 
-    # ★ 1位が3つ以上同率の場合の限定称号ロジック！
+    # 同率1位が3つ以上の場合の限定称号
     if len(top_tier_words) >= 3:
         t1, t2, t3 = (
             top_tier_words[0],
@@ -371,7 +377,6 @@ def generate_nickname(comments):
         ]
         return random.choice(special_templates), top_words
 
-    # 通常の2単語称号ロジック
     top1, count1 = top_words[0]
     top2 = (
         top_words[1][0]
@@ -510,7 +515,6 @@ def create_card_image(author_name, title, top_words, theme="スノー・パス�
         font=font_rank_head,
     )
 
-    # ★ 同率順位の計算と名刺画像への描画
     y_pos = 310
     current_rank = 1
     for idx, (word, count) in enumerate(top_words[:3]):
@@ -611,7 +615,6 @@ if "title" in st.session_state:
 
     st.subheader("❄️ 特徴的な名詞ランキング 🖋️（Top 5）")
 
-    # ★ 同率順位の可視化ロジック
     current_rank = 1
     for idx, (word, count) in enumerate(top_words, 0):
         if idx > 0 and count == top_words[idx - 1][1]:
