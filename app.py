@@ -127,7 +127,7 @@ st.markdown(
 
 
 # -------------------------------------------------------------
-# 2. コメント取得関数 (Playwright / クラウド環境対応)
+# 2. コメント取得関数 (Playwright / 超高速化＆クラウド対応版)
 # -------------------------------------------------------------
 def fetch_comments_web(author_name, max_scrolls=30):
     url = "https://utsulog.in"
@@ -150,9 +150,15 @@ def fetch_comments_web(author_name, max_scrolls=30):
         else:
             browser = p.chromium.launch(headless=True)
 
-        page = browser.new_page()
-        page.goto(url)
-        page.wait_for_load_state("networkidle")
+        # ★ 画像・フォント等の非テキストリソースを遮断して読み込みスピードを爆速化
+        context = browser.new_context()
+        page = context.new_page()
+        page.route(
+            "**/*.{png,jpg,jpeg,gif,svg,webp,css,woff,woff2,ttf,otf}",
+            lambda route: route.abort(),
+        )
+
+        page.goto(url, wait_until="domcontentloaded")
 
         try:
             author_input = page.locator(
@@ -165,7 +171,7 @@ def fetch_comments_web(author_name, max_scrolls=30):
 
             author_input.fill(author_name)
             author_input.press("Enter")
-            time.sleep(3)
+            time.sleep(1.5)
         except Exception:
             browser.close()
             return []
@@ -187,7 +193,7 @@ def fetch_comments_web(author_name, max_scrolls=30):
             )
 
             if current_count == 0:
-                time.sleep(1)
+                time.sleep(0.5)
                 continue
 
             if current_count == prev_count:
@@ -202,7 +208,7 @@ def fetch_comments_web(author_name, max_scrolls=30):
             last_elem = comment_elements[-1]
             last_elem.scroll_into_view_if_needed()
             page.keyboard.press("PageDown")
-            time.sleep(1.5)
+            time.sleep(0.5)
 
         final_elements = page.query_selector_all("p.text-slate-700")
         for elem in final_elements:
@@ -252,7 +258,7 @@ def generate_nickname(comments):
         "みたい",
         "んじゃ",
         "はず",
-        "わけ",
+        "分け",
         "どこ",
         "そこ",
         "あっち",
@@ -355,8 +361,9 @@ with col1:
 if generate_btn:
     raw_author = input_name.strip()
     if raw_author:
-        # @がつ出ない場合は自動付与
-        target_author = raw_author if raw_author.startswith("@") else f"@{raw_author}"
+        target_author = (
+            raw_author if raw_author.startswith("@") else f"@{raw_author}"
+        )
 
         with st.spinner("うつログにアクセス中..."):
             comments = fetch_comments_web(target_author)
