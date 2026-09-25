@@ -94,7 +94,7 @@ def set_bg_image():
     }}
 
     /* 入力フォーム枠を背景画像の上でも見やすくする白枠 */
-    div[data-testid="stTextInput"], div[data-testid="stButton"] {{
+    div[data-testid="stTextInput"], div[data-testid="stRadio"], div[data-testid="stButton"] {{
         background-color: rgba(255, 255, 255, 0.9) !important;
         padding: 1rem !important;
         border-radius: 12px !important;
@@ -118,7 +118,7 @@ st.markdown(
         <h1>❄️ うつログ 二つ名自動生成ソフト 🖊️</h1>
         <p>@から始まる投稿者名を入力してボタンを押すと、過去コメントの言葉の傾向を解析して<br>「二つ名」を自動生成します、どんな二つ名が飛び出すかな？</p>
         <div class="notice-text">
-            ※検索機能をお借りしているうつログのサーバー負荷軽減および処理時間短縮のため、直近のコメント（最大3,000件程度）を対象に解析を行っています。
+            ※検索機能をお借りしているうつログのサーバー負荷軽減および処理時間短縮のため、解析件数を選択できるようにしています。
         </div>
     </div>
 """,
@@ -127,9 +127,9 @@ st.markdown(
 
 
 # -------------------------------------------------------------
-# 2. コメント取得関数 (件数しっかり取得＆安全な高速化)
+# 2. コメント取得関数 (モード選択対応版)
 # -------------------------------------------------------------
-def fetch_comments_web(author_name, max_scrolls=40):
+def fetch_comments_web(author_name, max_scrolls=30, scroll_delay=1.0):
     url = "https://utsulog.in"
     comments = []
 
@@ -152,7 +152,7 @@ def fetch_comments_web(author_name, max_scrolls=40):
         context = browser.new_context()
         page = context.new_page()
 
-        # 画像のみ遮断して軽量化（スクリプトやCSSは読み込ませて無限スクロールを正常動作させる）
+        # 画像のみ遮断して軽量化
         page.route(
             "**/*.{png,jpg,jpeg,gif,svg,webp}", lambda route: route.abort()
         )
@@ -170,7 +170,7 @@ def fetch_comments_web(author_name, max_scrolls=40):
 
             author_input.fill(author_name)
             author_input.press("Enter")
-            time.sleep(2.0)  # 最初の検索結果読み込みをしっかり待つ
+            time.sleep(1.5)
         except Exception:
             browser.close()
             return []
@@ -192,24 +192,22 @@ def fetch_comments_web(author_name, max_scrolls=40):
             )
 
             if current_count == 0:
-                time.sleep(1.0)
+                time.sleep(0.8)
                 continue
 
-            # 変化がない場合の判定猶予を広げる
             if current_count == prev_count:
                 same_count_turns += 1
-                if same_count_turns >= 4:
+                if same_count_turns >= 3:
                     break
             else:
                 same_count_turns = 0
 
             prev_count = current_count
 
-            # 下部へスクロール後、うつログ側からの追加レスポンスを1秒確実に待つ
             last_elem = comment_elements[-1]
             last_elem.scroll_into_view_if_needed()
             page.keyboard.press("PageDown")
-            time.sleep(1.0)
+            time.sleep(scroll_delay)
 
         final_elements = page.query_selector_all("p.text-slate-700")
         for elem in final_elements:
@@ -259,7 +257,7 @@ def generate_nickname(comments):
         "みたい",
         "んじゃ",
         "はず",
-        "わけ",
+        "分け",
         "どこ",
         "そこ",
         "あっち",
@@ -352,6 +350,12 @@ input_name = st.text_input(
     placeholder="@ユーザー名を入力",
 )
 
+mode = st.radio(
+    "解析モードを選択してください",
+    options=["⚡ 爆速モード（直近〜500件程度）", "🐢 じっくり解析モード（直近〜3000件程度）"],
+    index=0,
+)
+
 col1, col2 = st.columns([1, 1])
 
 with col1:
@@ -366,8 +370,18 @@ if generate_btn:
             raw_author if raw_author.startswith("@") else f"@{raw_author}"
         )
 
+        # モードに応じた設定の分岐
+        if "爆速" in mode:
+            max_s = 15
+            delay = 0.6
+        else:
+            max_s = 40
+            delay = 1.0
+
         with st.spinner("うつログにアクセス中..."):
-            comments = fetch_comments_web(target_author)
+            comments = fetch_comments_web(
+                target_author, max_scrolls=max_s, scroll_delay=delay
+            )
 
         if comments:
             st.success(f"解析完了！ （対象コメント数: {len(comments)}件）")
