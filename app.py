@@ -294,7 +294,7 @@ def generate_nickname(comments):
     top_words = word_counts.most_common(5)
 
     if not top_words:
-        return "【静寂を愛する雪原の通行人】", "BEGINNER", "14回以下", []
+        return "【静寂を愛する雪原の通行人】", top_words
 
     top1, count1 = top_words[0]
     top2 = (
@@ -304,8 +304,6 @@ def generate_nickname(comments):
     )
 
     if count1 >= 50:
-        rank = "【GOD級】"
-        rank_range = "50回以上"
         templates = [
             f"【雪月花を統べし{top1}と{top2}の絶対神】",
             f"【銀世界に降臨せし{top1}と{top2}の創世主】",
@@ -313,8 +311,6 @@ def generate_nickname(comments):
             f"【氷の結晶が導く{top1}と{top2}の全知全能】",
         ]
     elif count1 >= 30:
-        rank = "【LEGEND級】"
-        rank_range = "30〜49回"
         templates = [
             f"【氷華咲き誇る{top1}と{top2}の覇王】",
             f"【星めぐりの空に輝く{top1}と{top2}の英雄】",
@@ -322,8 +318,6 @@ def generate_nickname(comments):
             f"【白銀の領域を統べる{top1}と{top2}の主】",
         ]
     elif count1 >= 15:
-        rank = "【MASTER級】"
-        rank_range = "15〜29回"
         templates = [
             f"【凍てつく夜に輝く{top1}と{top2}の探求者】",
             f"【うつろの雪原を拓く{top1}と{top2}のマスター】",
@@ -331,8 +325,6 @@ def generate_nickname(comments):
             f"【静寂の氷晶に{top1}と{top2}を紡ぐ者】",
         ]
     else:
-        rank = "【BEGINNER級】"
-        rank_range = "14回以下"
         templates = [
             f"【うつろの雪原に舞い降りし{top1}と{top2}の新星】",
             f"【かすかな粉雪のように揺れる{top1}と{top2}の愛好家】",
@@ -341,7 +333,7 @@ def generate_nickname(comments):
         ]
 
     selected_title = random.choice(templates)
-    return selected_title, rank, rank_range, top_words
+    return selected_title, top_words
 
 
 # -------------------------------------------------------------
@@ -373,7 +365,6 @@ if generate_btn:
             raw_author if raw_author.startswith("@") else f"@{raw_author}"
         )
 
-        # 500件（スクロール5回）/ 3000件（スクロール30回）の設定
         if "爆速" in mode:
             max_s = 5
             delay = 0.5
@@ -389,13 +380,10 @@ if generate_btn:
         if comments:
             st.success(f"解析完了！ （対象コメント数: {len(comments)}件）")
 
-            title, rank, rank_range, top_words = generate_nickname(comments)
+            title, top_words = generate_nickname(comments)
 
             st.markdown("---")
             st.subheader(f"🏷️ `{target_author}` の獲得称号")
-            st.caption(
-                f"称号ランク: **{rank}** (1位単語出現回数 {rank_range})"
-            )
             st.header(f":red[{title}]")
             st.markdown("---")
 
