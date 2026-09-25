@@ -159,6 +159,15 @@ def set_bg_image():
     .x-share-btn:hover {{
         background-color: #333333;
     }}
+
+    .reason-tag {{
+        font-size: 0.82rem;
+        color: #d97706;
+        background-color: #fef3c7;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 6px;
+    }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
@@ -280,13 +289,13 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（人物を連想させる語尾のみに厳選）
+# 3. 称号生成関数（同率不採用理由の解析・出力対応）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
     words = []
+    first_seen = {}  # 各単語の初出インデックス保持用
 
-    # ★ 優先度順のカスタム名詞
     custom_keywords = [
         "スパチュンパートナーズ",
         "スパチュンパートナー",
@@ -395,22 +404,27 @@ def generate_nickname(comments):
         flags=re.UNICODE,
     )
 
-    for comment in comments:
+    for idx, comment in enumerate(comments):
         working_comment = symbol_pattern.sub(" ", comment)
 
         # 1. カスタム名詞の保護抽出
         for ck in custom_keywords:
             if ck in working_comment:
                 count_ck = working_comment.count(ck)
-                if ck == "姉ちゃん":
-                    target_word = "お姉ちゃん"
-                elif ck == "スパチュンパートナー":
-                    target_word = "スパチュンパートナーズ"
-                else:
-                    target_word = ck
+                target_word = (
+                    "お姉ちゃん"
+                    if ck == "姉ちゃん"
+                    else (
+                        "スパチュンパートナーズ"
+                        if ck == "スパチュンパートナー"
+                        else ck
+                    )
+                )
 
                 for _ in range(count_ck):
                     words.append(target_word)
+                    if target_word not in first_seen:
+                        first_seen[target_word] = idx
                 working_comment = working_comment.replace(ck, " ")
 
         # 2. 通常の形態素解析
@@ -429,6 +443,8 @@ def generate_nickname(comments):
                         and not re.match(r"^[\.\…\―\─\～\〜]+$", word)
                     ):
                         words.append(word)
+                        if word not in first_seen:
+                            first_seen[word] = idx
             elif pos_main in ["カスタム名詞", "未知語"]:
                 word = token.surface.strip()
                 if (
@@ -438,19 +454,65 @@ def generate_nickname(comments):
                     and not re.match(r"^[\.\…\―\─\～\〜]+$", word)
                 ):
                     words.append(word)
+                    if word not in first_seen:
+                        first_seen[word] = idx
 
     word_counts = Counter(words)
-    top_words = word_counts.most_common(5)
+    top_words_raw = word_counts.most_common(10)
 
-    if not top_words:
-        return "【静寂を愛する雪原の通行人】", top_words
+    if not top_words_raw:
+        return "【静寂を愛する雪原の通行人】", [], {}
 
-    # 同率1位の判定処理
+    # ★ 同率時の採用優先順位決定（①回数 > ②文字数長 > ③初出順 > ④五十音順）
+    sorted_words = sorted(
+        top_words_raw,
+        key=lambda x: (
+            x[1],
+            len(x[0]),
+            -first_seen.get(x[0], 99999),
+            x[0],
+        ),
+        reverse=True,
+    )
+
+    top_words = sorted_words[:5]
+
+    # ★ 同率理由の解析マッピング構築
+    reasons = {}
     max_count = top_words[0][1]
-    top_tier_words = [word for word, count in top_words if count == max_count]
+    top_tier_words = [w for w, c in top_words if c == max_count]
 
-    # 同率1位が3つ以上の場合の限定称号（必ず人物を連想させる語尾に統括）
-    if len(top_tier_words) >= 3:
+    is_special_three = len(top_tier_words) >= 3
+
+    for i, (word, count) in enumerate(top_words):
+        # 他に同じ出現回数の単語が存在するか確認
+        same_count_group = [w for w, c in top_words if c == count]
+
+        if len(same_count_group) > 1:
+            if is_special_three and count == max_count and i < 3:
+                reasons[word] = "🌟 限定称号にトリプル採用！"
+            elif i == 0 or (i == 1 and not is_special_three):
+                reasons[word] = "✨ 称号メインキーワードに選出！"
+            else:
+                # 選ばれなかった理由の具体判定
+                winner = top_words[0][0]
+                if len(word) < len(winner):
+                    reasons[word] = (
+                        f"💡 同率{count}回：文字数が短い（{winner}を優先）"
+                    )
+                elif first_seen.get(word, 0) > first_seen.get(winner, 0):
+                    reasons[word] = (
+                        f"💡 同率{count}回：コメント初出順（{winner}が先出）"
+                    )
+                else:
+                    reasons[word] = (
+                        f"💡 同率{count}回：五十音順（{winner}を優先）"
+                    )
+        else:
+            reasons[word] = ""
+
+    # 称号決定ロジック
+    if is_special_three:
         t1, t2, t3 = (
             top_tier_words[0],
             top_tier_words[1],
@@ -462,7 +524,7 @@ def generate_nickname(comments):
             f"【{t1}・{t2}・{t3}の言葉を極めし賢者】",
             f"【{t1}も{t2}も{t3}も愛する万能の雪原知識人】",
         ]
-        return random.choice(special_templates), top_words
+        return random.choice(special_templates), top_words, reasons
 
     top1, count1 = top_words[0]
     top2 = (
@@ -471,7 +533,6 @@ def generate_nickname(comments):
         else ("言葉" if top1 != "言葉" else "話題")
     )
 
-    # ★ すべて語尾が「人物（神・創世主・支配者・超越者・覇王・英雄など）」で終わるテンプレートに統一
     if count1 >= 50:
         templates = [
             f"【雪月花を統べし{top1}と{top2}の絶対神】",
@@ -502,7 +563,7 @@ def generate_nickname(comments):
         ]
 
     selected_title = random.choice(templates)
-    return selected_title, top_words
+    return selected_title, top_words, reasons
 
 
 # -------------------------------------------------------------
@@ -676,9 +737,10 @@ if generate_btn:
         if comments:
             st.session_state["comments"] = comments
             st.session_state["target_author"] = target_author
-            title, top_words = generate_nickname(comments)
+            title, top_words, reasons = generate_nickname(comments)
             st.session_state["title"] = title
             st.session_state["top_words"] = top_words
+            st.session_state["reasons"] = reasons
         else:
             st.error(
                 "コメントが取得できませんでした。投稿者名を確認してください。"
@@ -693,6 +755,7 @@ if "title" in st.session_state:
     target_author = st.session_state["target_author"]
     title = st.session_state["title"]
     top_words = st.session_state["top_words"]
+    reasons = st.session_state.get("reasons", {})
 
     st.success("解析完了！")
 
@@ -711,7 +774,17 @@ if "title" in st.session_state:
             current_rank = idx + 1
             rank_label = f"第 {current_rank} 位"
 
-        st.write(f"**{rank_label}**: `{word}` （{count} 回出現）")
+        reason_text = reasons.get(word, "")
+        reason_html = (
+            f'<span class="reason-tag">{reason_text}</span>'
+            if reason_text
+            else ""
+        )
+
+        st.markdown(
+            f"**{rank_label}**: `{word}` （{count} 回出現） {reason_html}",
+            unsafe_allow_html=True,
+        )
 
     st.markdown("---")
 
