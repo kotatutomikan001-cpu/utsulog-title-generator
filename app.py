@@ -279,7 +279,7 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（決定論的固定ロジック搭載版）
+# 3. 称号生成関数（単語分散・文章組み立て強化版）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
@@ -444,9 +444,9 @@ def generate_nickname(comments):
     top_words = word_counts.most_common(5)
 
     if not top_words:
-        return "【静寂を愛する雪原の通行人】", top_words
+        return "【静寂を愛する白銀の図書委員】", top_words
 
-    # ★ 内部規則用計算（出現回数の合計 ＋ メイン単語の文字コード和）
+    # 内部規則用ハッシュ計算（出現回数の合計＋メイン単語の文字コード和）
     total_count_sum = sum([count for word, count in top_words])
     primary_word_code = sum([ord(c) for c in top_words[0][0]])
     hash_value = total_count_sum + primary_word_code
@@ -455,7 +455,7 @@ def generate_nickname(comments):
     max_count = top_words[0][1]
     top_tier_words = [word for word, count in top_words if count == max_count]
 
-    # 同率1位が3つ以上の場合の限定称号
+    # ★ 同率1位が3つ以上の場合の限定称号（3つの単語を文章中に自然分散）
     if len(top_tier_words) >= 3:
         t1, t2, t3 = (
             top_tier_words[0],
@@ -463,12 +463,17 @@ def generate_nickname(comments):
             top_tier_words[2],
         )
         special_templates = [
-            f"【{t1}と{t2}と{t3}を語り継ぐ百花繚乱の語り部】",
-            f"【{t1}・{t2}・{t3}を統べし三位一体の絶対者】",
-            f"【{t1}・{t2}・{t3}の言葉を極めし賢者】",
-            f"【{t1}も{t2}も{t3}も愛する万能の雪原知識人】",
+            f"【{t1}を白銀に刻み{t2}と{t3}を誌面に記す編纂者】",
+            f"【{t1}を司り{t2}を解き明かし{t3}の言葉を極めし賢者】",
+            f"【{t1}の羊皮紙を紐解き{t2}と{t3}の真理を紡ぐ語り部】",
+            f"【{t1}の筆跡に{t2}を重ね{t3}の領域を統べる絶対者】",
+            f"【{t1}を胸に{t2}の詩編を詠み{t3}を愛でる雪原知識人】",
+            f"【{t1}の書庫から{t2}を取り出し{t3}の未来を描く創世主】",
+            f"【{t1}を誌面に讃え{t2}と{t3}の旋律を奏でる超越者】",
+            f"【{t1}のペンを握り{t2}の深淵と{t3}の極致へ挑む探求者】",
+            f"【{t1}を記しし原稿に{t2}と{t3}の軌跡を残す職人】",
+            f"【{t1}の書巻を広げ{t2}を認め{t3}を語り継ぐマスター】",
         ]
-        # ハッシュ値に基づく規則的インデックス選択（固定）
         selected_idx = hash_value % len(special_templates)
         return special_templates[selected_idx], top_words
 
@@ -479,36 +484,60 @@ def generate_nickname(comments):
         else ("言葉" if top1 != "言葉" else "話題")
     )
 
+    # ★ 単語（top1, top2）を自然に文章前半・後半に分散配置した10パターン
     if count1 >= 50:
         templates = [
-            f"【雪月花を統べし{top1}と{top2}の絶対神】",
-            f"【銀世界に降臨せし{top1}と{top2}の創世主】",
-            f"【凍てつく世界を統べる{top1}と{top2}の支配者】",
-            f"【氷の結晶が導く{top1}と{top2}の全知全能の超越者】",
+            f"【{top1}の白銀図書館で{top2}の真理を刻みし絶対神】",
+            f"【{top1}を司る万年筆で{top2}の創世記を編む創世主】",
+            f"【{top1}の書架を紐解き{top2}の極致を記す支配者】",
+            f"【{top1}を氷晶のペンに込め{top2}の未来へ導く超越者】",
+            f"【{top1}の深淵を統べし者にして{top2}を詩う絶対者】",
+            f"【{top1}の羊皮紙を刻み{top2}の大体系を創出せし神】",
+            f"【{top1}を筆先から放ち{top2}の世界を創造せし創世主】",
+            f"【{top1}の大百科を著し{top2}の真理を掲げる支配者】",
+            f"【{top1}のインクで歴史を染め{top2}の運命を執筆せし絶対神】",
+            f"【{top1}の全書庫を制し{top2}の真髄に到達せし超越者】",
         ]
     elif count1 >= 30:
         templates = [
-            f"【氷華咲き誇る{top1}と{top2}の覇王】",
-            f"【星めぐり学園の空に輝く{top1}と{top2}の英雄】",
-            f"【氷室の深淵にて{top1}と{top2}を極めし探求者】",
-            f"【白銀の領域を統べる{top1}と{top2}の主】",
+            f"【{top1}を白銀に刻み{top2}の物語を認める覇王】",
+            f"【{top1}の空に想いを馳せ{top2}の章を詠む英雄】",
+            f"【{top1}の書庫に深く潜り{top2}の真理を極めし執筆者】",
+            f"【{top1}の書巻を広げ{top2}の領域を統べる主】",
+            f"【{top1}を凍てつく筆先に込め{top2}を描く者】",
+            f"【{top1}の図書室で静かに{top2}の解を導く英雄】",
+            f"【{top1}を原稿用紙に走らせ{top2}を解き明かす覇王】",
+            f"【{top1}を万年筆に宿し{top2}の歴史を紡ぐ主】",
+            f"【{top1}に栞を挟み{top2}の魅力を熱く語る探求者】",
+            f"【{top1}の美しい筆致で{top2}の誌面を彩る覇王】",
         ]
     elif count1 >= 15:
         templates = [
-            f"【凍てつく夜に輝く{top1}と{top2}の探求者】",
-            f"【うつろの雪原を拓く{top1}と{top2}のマスター】",
-            f"【星めぐり学園で{top1}と{top2}を語る伝道者】",
-            f"【静寂の氷晶に{top1}と{top2}を紡ぐ職人】",
+            f"【{top1}のインクを紡ぎ{top2}の軌跡を記す探求者】",
+            f"【{top1}のノートを開き{top2}の世界を拓くマスター】",
+            f"【{top1}を愛する文豪として{top2}の物語を綴る伝道者】",
+            f"【{top1}の氷晶を抱き{top2}の篇章を認める職人】",
+            f"【{top1}の原稿用紙に{top2}の想いを走らせるマスター】",
+            f"【{top1}の書簡をしたため{top2}への愛を語る編纂者】",
+            f"【{top1}を冴えた筆先で捉え{top2}の詩を認める探求者】",
+            f"【{top1}の静寂の中で{top2}の旋律を紡ぐ職人】",
+            f"【{top1}の書架から紐解き{top2}を語り継ぐ伝道者】",
+            f"【{top1}をインク瓶から掬い{top2}の言葉へ昇華させるマスター】",
         ]
     else:
         templates = [
-            f"【うつろの雪原に舞い降りし{top1}と{top2}の新星】",
-            f"【粉雪とともに{top1}と{top2}を愛でる者】",
-            f"【ひんやり優しく{top1}と{top2}を語る者】",
-            f"【氷室の風に乗せて{top1}と{top2}を届ける案内人】",
+            f"【{top1}のキャンバスに{top2}の記憶を書き留める新星】",
+            f"【{top1}を雪の羽ペンに載せ{top2}を優しく綴る者】",
+            f"【{top1}のぬくもりを胸に{top2}を誌面に描く者】",
+            f"【{top1}の風に乗り{top2}の書簡を届ける案内人】",
+            f"【{top1}の傍らにペンを置き{top2}を愛でる案内人】",
+            f"【{top1}のメモ帳を開き{top2}を小さく認める新星】",
+            f"【{top1}をノートの片隅に記し{top2}を描く者】",
+            f"【{top1}の書架の前で静かに{top2}を語る愛好家】",
+            f"【{top1}の便せんを広げ{top2}の手紙をしたためる者】",
+            f"【{top1}を氷の結晶のペンで{top2}の横にそっと記す新星】",
         ]
 
-    # ハッシュ値に基づく規則的インデックス選択（固定）
     selected_idx = hash_value % len(templates)
     selected_title = templates[selected_idx]
 
