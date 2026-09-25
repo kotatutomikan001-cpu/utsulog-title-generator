@@ -223,12 +223,13 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 二つ名生成関数（氷室うつろモチーフ称号生成）
+# 3. 二つ名生成関数（名詞認識範囲・拡大版）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
     words = []
 
+    # 二つ名として意味をなさない一般的な指示語や助詞由来のみを除外
     stop_words = {
         "こと",
         "よう",
@@ -245,7 +246,6 @@ def generate_nickname(comments):
         "ため",
         "さん",
         "ちゃん",
-        "配信",
         "思い",
         "感じ",
         "いい",
@@ -256,7 +256,7 @@ def generate_nickname(comments):
         "みたい",
         "んじゃ",
         "はず",
-        "わけ",
+        "分け",
         "どこ",
         "そこ",
         "あっち",
@@ -269,11 +269,19 @@ def generate_nickname(comments):
         "うち",
         "どこか",
         "そこら",
-        "好き",
         "もの",
         "ほう",
         "明日",
     }
+
+    # ★ 抽出対象とする名詞の細分類リスト（固有名詞やサ変接続なども幅広く許可）
+    allowed_subcategories = [
+        "一般",
+        "固有名詞",
+        "サ変接続",
+        "形容動詞語幹",
+        "ナイ形容詞語幹",
+    ]
 
     for comment in comments:
         for token in tokenizer.tokenize(comment):
@@ -281,12 +289,14 @@ def generate_nickname(comments):
             pos_main = pos_details[0]
             pos_sub = pos_details[1]
 
-            if pos_main == "名詞" and pos_sub not in [
-                "非自立",
-                "代名詞",
-                "数",
-            ]:
-                word = token.base_form
+            # 名詞（および辞書未登録の未知語）を広く認識
+            if pos_main == "名詞":
+                if pos_sub in allowed_subcategories or pos_sub == "*":
+                    word = token.base_form
+                    if len(word) > 1 and word not in stop_words:
+                        words.append(word)
+            elif pos_main == "カスタム名詞" or pos_main == "未知語":
+                word = token.surface
                 if len(word) > 1 and word not in stop_words:
                     words.append(word)
 
