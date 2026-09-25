@@ -5,6 +5,7 @@ import os
 import random
 import shutil
 import time
+import urllib.parse
 import urllib.request
 from janome.tokenizer import Tokenizer
 from PIL import Image, ImageDraw, ImageFont
@@ -28,7 +29,6 @@ st.set_page_config(
 def get_japanese_font():
     font_path = "NotoSansJP-Bold.ttf"
     if not os.path.exists(font_path):
-        # Google Fontsの日本語対応フォントを自動ダウンロード
         url = "https://github.com/google/fonts/raw/main/ofl/notosansjp/NotoSansJP-Bold.ttf"
         try:
             urllib.request.urlretrieve(url, font_path)
@@ -432,15 +432,27 @@ def create_card_image(author_name, title, top_words):
         ) = font_footer = ImageFont.load_default()
 
     # ヘッダーテキスト
-    draw.text((50, 45), "うつログ 獲得称号名刺", fill=(148, 163, 184), font=font_header)
-    draw.text((50, 85), f"投稿者: {author_name}", fill=(248, 250, 252), font=font_author)
+    draw.text(
+        (50, 45), "うつログ 獲得称号名刺", fill=(148, 163, 184), font=font_header
+    )
+    draw.text(
+        (50, 85),
+        f"投稿者: {author_name}",
+        fill=(248, 250, 252),
+        font=font_author,
+    )
 
     # 二つ名（赤枠アクセント）
     draw.rectangle([50, 145, width - 50, 235], fill=(30, 41, 59))
     draw.text((70, 168), title, fill=(244, 63, 94), font=font_title)
 
     # 特徴的単語Top 3
-    draw.text((50, 265), "📊 特徴的な名詞ランキング", fill=(226, 232, 240), font=font_rank_head)
+    draw.text(
+        (50, 265),
+        "📊 特徴的な名詞ランキング",
+        fill=(226, 232, 240),
+        font=font_rank_head,
+    )
     y_pos = 310
     for idx, (word, count) in enumerate(top_words[:3], 1):
         draw.text(
@@ -527,9 +539,11 @@ if generate_btn:
             # 名刺画像の生成
             img_bytes = create_card_image(target_author, title, top_words)
 
-            # 画面上に名刺画像をプレビュー表示！
+            # 画面上に名刺画像をプレビュー表示！（修正箇所）
             st.image(
-                img_bytes, caption="生成された称号名刺カード", use_column_width=True
+                img_bytes,
+                caption="生成された称号名刺カード",
+                use_container_width=True,
             )
 
             st.write("")
@@ -546,8 +560,6 @@ if generate_btn:
                 )
 
             with btn_col2:
-                import urllib.parse
-
                 tweet_text = (
                     f"{target_author} の獲得称号は…\n\n"
                     f"✨ {title} ✨\n\n"
