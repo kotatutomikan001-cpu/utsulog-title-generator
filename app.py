@@ -42,7 +42,7 @@ def get_japanese_font():
 
 
 # -------------------------------------------------------------
-# ★ 背景画像・CSSのデザイン設定（ダークモード対応強化）
+# ★ 背景画像・CSSのデザイン設定（ダークモード文字被り完全修復）
 # -------------------------------------------------------------
 def set_bg_image():
     image_file = None
@@ -83,7 +83,7 @@ def set_bg_image():
         padding-top: 2rem !important;
     }}
 
-    /* タイトル〜注意書きを入れる黒ウィンドウ枠 */
+    /* ★ 1. 上の黒ウィンドウ枠（常に白文字固定） */
     .header-box {{
         background-color: rgba(15, 23, 42, 0.92) !important;
         color: #ffffff !important;
@@ -101,22 +101,22 @@ def set_bg_image():
     }}
 
     .header-box p {{
-        color: #e2e8f0 !important;
+        color: #f1f5f9 !important;
         font-size: 0.95rem !important;
         line-height: 1.7 !important;
         margin-bottom: 0.8rem !important;
     }}
 
     .header-box .notice-text {{
-        color: #94a3b8 !important;
+        color: #cbd5e1 !important;
         font-size: 0.85rem !important;
         line-height: 1.5 !important;
-        border-top: 1px solid #334155;
-        padding-top: 0.8rem;
-        margin-top: 0.8rem;
+        border-top: 1px solid #334155 !important;
+        padding-top: 0.8rem !important;
+        margin-top: 0.8rem !important;
     }}
 
-    /* 入力フォーム枠（白背景固定） */
+    /* ★ 2. 下のフォーム枠（白背景固定） */
     div[data-testid="stTextInput"], div[data-testid="stRadio"], div[data-testid="stButton"] {{
         background-color: rgba(255, 255, 255, 0.92) !important;
         padding: 1rem !important;
@@ -125,23 +125,22 @@ def set_bg_image():
         box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
     }}
 
-    /* ★ ダークモード対策：白枠内のすべての文字色を「濃いネイビー/黒」に固定 */
+    /* ★ フォーム枠内だけの文字を「黒（ネイビー）」に限定固定 */
     div[data-testid="stTextInput"] label, 
     div[data-testid="stRadio"] label, 
     div[data-testid="stRadio"] p,
-    div[data-testid="stMarkdownContainer"] p,
     div[role="radiogroup"] label span {{
         color: #0f172a !important;
         font-weight: 600 !important;
     }}
 
-    /* 入力ボックスの中の文字色 */
+    /* 入力ボックスの中のテキスト */
     div[data-testid="stTextInput"] input {{
         color: #0f172a !important;
         background-color: #ffffff !important;
     }}
 
-    /* プレースホルダー文字（「@ユーザー名を入力」）の色 */
+    /* プレースホルダー文字の色 */
     div[data-testid="stTextInput"] input::placeholder {{
         color: #64748b !important;
     }}
