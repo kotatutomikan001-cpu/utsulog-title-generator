@@ -7,7 +7,7 @@ import shutil
 import time
 import urllib.parse
 from janome.tokenizer import Tokenizer
-from PIL import Image, ImageDraw, ImageEnhance, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 from playwright.sync_api import sync_playwright
 import streamlit as st
 
@@ -15,7 +15,7 @@ import streamlit as st
 # 1. 画面デザイン・タイトルの設定
 # -------------------------------------------------------------
 st.set_page_config(
-    page_title="うつログ 二つ名ジェネレーター",
+    page_title="うつログ二つ名ジェネレーター",
     page_icon="❄️",
     layout="centered",
 )
@@ -26,8 +26,8 @@ st.set_page_config(
 # -------------------------------------------------------------
 def get_japanese_font():
     font_candidates = [
-        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
         "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
         "/usr/share/fonts/truetype/ipafont-gothic/ipag.ttf",
         "/usr/share/fonts/truetype/fonts-japanese-gothic.ttf",
         "NotoSansJP-Bold.ttf",
@@ -382,12 +382,12 @@ def generate_nickname(comments):
 
 
 # -------------------------------------------------------------
-# ★ 名刺画像生成関数（背景画像オーバーレイ合成対応）
+# ★ 名刺画像生成関数（明るい背景画像 ＆ 黒系文字対応）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words):
     width, height = 1000, 560
 
-    # 背景画像（bg.png または bg.jpg）がある場合は読み込んでリサイズ＆ダーク合成
+    # 背景画像（bg.png または bg.jpg）を読み込んでそのままリサイズ
     bg_file = None
     if os.path.exists("bg.png"):
         bg_file = "bg.png"
@@ -395,22 +395,24 @@ def create_card_image(author_name, title, top_words):
         bg_file = "bg.jpg"
 
     if bg_file:
-        bg_img = Image.open(bg_file).convert("RGBA")
-        bg_img = bg_img.resize((width, height))
-        # 暗めのオーバーレイ層（文字の視認性向上のため）
-        dark_overlay = Image.new("RGBA", (width, height), (15, 23, 42, 200))
-        img = Image.alpha_composite(bg_img, dark_overlay).convert("RGB")
+        img = Image.open(bg_file).convert("RGB")
+        img = img.resize((width, height))
     else:
-        img = Image.new("RGB", (width, height), color=(15, 23, 42))
+        # 画像が無い場合は明るいパステルブルー背景
+        img = Image.new("RGB", (width, height), color=(240, 248, 255))
+
+    # 文字の視認性を高めるため、全体にほんのり薄い白グラデーション/パネルを敷く
+    overlay = Image.new("RGBA", (width, height), (255, 255, 255, 160))
+    img = Image.alpha_composite(img.convert("RGBA"), overlay).convert("RGB")
 
     draw = ImageDraw.Draw(img)
 
-    # 枠線
+    # 枠線（深みのあるネイビー）
     draw.rectangle(
-        [20, 20, width - 20, height - 20], outline=(51, 65, 85), width=3
+        [20, 20, width - 20, height - 20], outline=(30, 41, 59), width=3
     )
     draw.rectangle(
-        [26, 26, width - 26, height - 26], outline=(148, 163, 184), width=1
+        [26, 26, width - 26, height - 26], outline=(71, 85, 105), width=1
     )
 
     font_path = get_japanese_font()
@@ -418,7 +420,7 @@ def create_card_image(author_name, title, top_words):
     if font_path:
         font_header = ImageFont.truetype(font_path, 22)
         font_author = ImageFont.truetype(font_path, 32)
-        font_title = ImageFont.truetype(font_path, 34)
+        font_title = ImageFont.truetype(font_path, 32)
         font_rank_head = ImageFont.truetype(font_path, 24)
         font_rank_item = ImageFont.truetype(font_path, 22)
         font_footer = ImageFont.truetype(font_path, 18)
@@ -427,37 +429,39 @@ def create_card_image(author_name, title, top_words):
             font_rank_item
         ) = font_footer = ImageFont.load_default()
 
+    # 黒系〜濃紺のテキストカラー
+    text_dark = (15, 23, 42)  # 濃いネイビー（ほぼ黒）
+    text_sub = (51, 65, 85)  # サブテキスト用グレーネイビー
+    red_accent = (225, 29, 72)  # 二つ名用アクセントレッド
+
     # ヘッダーテキスト
     draw.text(
-        (50, 45),
-        "うつログ二つ名ジェネレーター",
-        fill=(148, 163, 184),
-        font=font_header,
+        (50, 45), "うつログ二つ名ジェネレーター", fill=text_sub, font=font_header
     )
-    draw.text(
-        (50, 85),
-        f"投稿者: {author_name}",
-        fill=(248, 250, 252),
-        font=font_author,
+    draw.text((50, 85), f"投稿者: {author_name}", fill=text_dark, font=font_author)
+
+    # 二つ名（白背景枠＋濃い赤文字でくっきり表示）
+    draw.rectangle(
+        [50, 145, width - 50, 235],
+        fill=(255, 255, 255),
+        outline=(226, 232, 240),
+        width=2,
     )
+    draw.text((70, 168), title, fill=red_accent, font=font_title)
 
-    # 二つ名（赤枠アクセント）
-    draw.rectangle([50, 145, width - 50, 235], fill=(30, 41, 59))
-    draw.text((70, 168), title, fill=(244, 63, 94), font=font_title)
-
-    # 特徴的単語Top 3
+    # ★ 記号文字化け回避：テキスト表記での「特徴的な名詞ランキング」
     draw.text(
         (50, 265),
-        "📊 特徴的な名詞ランキング",
-        fill=(226, 232, 240),
+        "◇ 特徴的な名詞ランキング",
+        fill=text_dark,
         font=font_rank_head,
     )
     y_pos = 310
     for idx, (word, count) in enumerate(top_words[:3], 1):
         draw.text(
             (70, y_pos),
-            f"第 {idx} 位:  {word}  ({count} 回)",
-            fill=(203, 213, 225),
+            f"第 {idx} 位:   {word}   ({count} 回)",
+            fill=text_dark,
             font=font_rank_item,
         )
         y_pos += 42
@@ -466,7 +470,7 @@ def create_card_image(author_name, title, top_words):
     draw.text(
         (50, 490),
         "#うつログ二つ名ジェネレーター  |  氷室うつろ非公式ファンツール",
-        fill=(100, 116, 139),
+        fill=text_sub,
         font=font_footer,
     )
 
@@ -526,7 +530,8 @@ if generate_btn:
             st.header(f":red[{title}]")
             st.markdown("---")
 
-            st.subheader("📊 特徴的な名詞ランキング（Top 5）")
+            # アプリ画面上の見出しを「❄️ 特徴的な名詞ランキング 🖋️」に更新
+            st.subheader("❄️ 特徴的な名詞ランキング 🖋️（Top 5）")
             for rank_num, (word, count) in enumerate(top_words, 1):
                 st.write(f"**第 {rank_num} 位**: `{word}` （{count} 回出現）")
 
