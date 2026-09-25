@@ -538,10 +538,13 @@ if generate_btn:
                 )
 
             with btn_col2:
-                # テキスト全体のエンコード（Xバグ対策）
+                # ★ ツールのURLを自動で本文に含める設定
+                app_url = "https://utsulog-title-generator.streamlit.app"
                 raw_tweet_text = (
                     f"{target_author} の獲得称号は…\n\n"
                     f"✨ {title} ✨\n\n"
+                    f"👇 二つ名自動生成ソフトはこちら！\n"
+                    f"{app_url}\n\n"
                     f"#うつログ二つ名ジェネレーター #氷室うつろ"
                 )
                 encoded_text = urllib.parse.quote(raw_tweet_text)
