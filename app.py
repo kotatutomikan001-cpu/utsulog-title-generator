@@ -280,14 +280,16 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（「ゴッドハンド」「毒チワワ」追加版）
+# 3. 称号生成関数（人物を連想させる語尾のみに厳選）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
     words = []
 
-    # ★ 優先度順のカスタム名詞（「ゴッドハンド」「毒チワワ」を追加！）
+    # ★ 優先度順のカスタム名詞
     custom_keywords = [
+        "スパチュンパートナーズ",
+        "スパチュンパートナー",
         "ゴッドハンド",
         "ミニうつろ",
         "ねろんが様",
@@ -364,6 +366,13 @@ def generate_nickname(comments):
         "もの",
         "ほう",
         "明日",
+        "…",
+        "...",
+        "..",
+        "‥",
+        "―",
+        "〜",
+        "～",
     }
 
     allowed_subcategories = [
@@ -374,29 +383,35 @@ def generate_nickname(comments):
         "ナイ形容詞語幹",
     ]
 
-    # ★ 絵文字・特殊記号を除外する正規表現パターン
-    emoji_pattern = re.compile(
+    symbol_pattern = re.compile(
         "["
         "\U0001f300-\U0001f9ff"
         "\U0001fa00-\U0001fa9f"
         "\u2600-\u27bf"
         "\ufe0f"
         "\u2744"
+        "…‥・―～〜!！?？♪★☆◇◆◎○●"
         "]+",
         flags=re.UNICODE,
     )
 
     for comment in comments:
-        working_comment = emoji_pattern.sub("", comment)
+        working_comment = symbol_pattern.sub(" ", comment)
 
         # 1. カスタム名詞の保護抽出
         for ck in custom_keywords:
             if ck in working_comment:
                 count_ck = working_comment.count(ck)
-                target_word = "お姉ちゃん" if ck == "姉ちゃん" else ck
+                if ck == "姉ちゃん":
+                    target_word = "お姉ちゃん"
+                elif ck == "スパチュンパートナー":
+                    target_word = "スパチュンパートナーズ"
+                else:
+                    target_word = ck
+
                 for _ in range(count_ck):
                     words.append(target_word)
-                working_comment = working_comment.replace(ck, "")
+                working_comment = working_comment.replace(ck, " ")
 
         # 2. 通常の形態素解析
         for token in tokenizer.tokenize(working_comment):
@@ -404,21 +419,23 @@ def generate_nickname(comments):
             pos_main = pos_details[0]
             pos_sub = pos_details[1]
 
-            if pos_main == "名詞":
+            if pos_main == "名詞" and pos_sub != "数":
                 if pos_sub in allowed_subcategories or pos_sub == "*":
-                    word = token.base_form
+                    word = token.base_form.strip()
                     if (
                         len(word) > 1
                         and word not in stop_words
-                        and not emoji_pattern.search(word)
+                        and not symbol_pattern.search(word)
+                        and not re.match(r"^[\.\…\―\─\～\〜]+$", word)
                     ):
                         words.append(word)
-            elif pos_main == "カスタム名詞" or pos_main == "未知語":
-                word = token.surface
+            elif pos_main in ["カスタム名詞", "未知語"]:
+                word = token.surface.strip()
                 if (
                     len(word) > 1
                     and word not in stop_words
-                    and not emoji_pattern.search(word)
+                    and not symbol_pattern.search(word)
+                    and not re.match(r"^[\.\…\―\─\～\〜]+$", word)
                 ):
                     words.append(word)
 
@@ -432,7 +449,7 @@ def generate_nickname(comments):
     max_count = top_words[0][1]
     top_tier_words = [word for word, count in top_words if count == max_count]
 
-    # 同率1位が3つ以上の場合の限定称号
+    # 同率1位が3つ以上の場合の限定称号（必ず人物を連想させる語尾に統括）
     if len(top_tier_words) >= 3:
         t1, t2, t3 = (
             top_tier_words[0],
@@ -440,9 +457,9 @@ def generate_nickname(comments):
             top_tier_words[2],
         )
         special_templates = [
-            f"【{t1}と{t2}と{t3}が織りなす百花繚乱の語り部】",
+            f"【{t1}と{t2}と{t3}を語り継ぐ百花繚乱の語り部】",
             f"【{t1}・{t2}・{t3}を統べし三位一体の絶対者】",
-            f"【{t1}・{t2}・{t3}が咲き乱れる言葉の絢爛】",
+            f"【{t1}・{t2}・{t3}の言葉を極めし賢者】",
             f"【{t1}も{t2}も{t3}も愛する万能の雪原知識人】",
         ]
         return random.choice(special_templates), top_words
@@ -454,6 +471,7 @@ def generate_nickname(comments):
         else ("言葉" if top1 != "言葉" else "話題")
     )
 
+    # ★ すべて語尾が「人物（神・創世主・支配者・超越者・覇王・英雄など）」で終わるテンプレートに統一
     if count1 >= 50:
         templates = [
             f"【雪月花を統べし{top1}と{top2}の絶対神】",
@@ -465,22 +483,22 @@ def generate_nickname(comments):
         templates = [
             f"【氷華咲き誇る{top1}と{top2}の覇王】",
             f"【星めぐりの空に輝く{top1}と{top2}の英雄】",
-            f"【氷室の深淵にて{top1}と{top2}を極めし者】",
+            f"【氷室の深淵にて{top1}と{top2}を極めし探求者】",
             f"【白銀の領域を統べる{top1}と{top2}の主】",
         ]
     elif count1 >= 15:
         templates = [
             f"【凍てつく夜に輝く{top1}と{top2}の探求者】",
             f"【うつろの雪原を拓く{top1}と{top2}のマスター】",
-            f"【星めぐりの学園に響く{top1}と{top2}の物語】",
-            f"【静寂の氷晶に{top1}と{top2}を紡ぐ者】",
+            f"【星めぐりの学園で{top1}と{top2}を語る伝道者】",
+            f"【静寂の氷晶に{top1}と{top2}を紡ぐ職人】",
         ]
     else:
         templates = [
             f"【うつろの雪原に舞い降りし{top1}と{top2}の新星】",
-            f"【かすかな粉雪のように揺れる{top1}と{top2}の愛好家】",
+            f"【粉雪とともに{top1}と{top2}を愛でる者】",
             f"【ひんやり優しく{top1}と{top2}を語る者】",
-            f"【氷室の風に乗せて{top1}と{top2}を届ける者】",
+            f"【氷室の風に乗せて{top1}と{top2}を届ける案内人】",
         ]
 
     selected_title = random.choice(templates)
