@@ -382,9 +382,9 @@ def generate_nickname(comments):
 
 
 # -------------------------------------------------------------
-# ★ 名刺画像生成関数
+# ★ テーマ別名刺画像生成関数（3パターン対応）
 # -------------------------------------------------------------
-def create_card_image(author_name, title, top_words):
+def create_card_image(author_name, title, top_words, theme="スノー・パステル"):
     width, height = 1000, 560
 
     bg_file = None
@@ -393,22 +393,51 @@ def create_card_image(author_name, title, top_words):
     elif os.path.exists("bg.jpg"):
         bg_file = "bg.jpg"
 
+    # テーマ設定の定義
+    if theme == "スタイリッシュ・ダーク":
+        overlay_color = (15, 23, 42, 230)  # ダークネイビー重め
+        border_outer = (51, 65, 85)
+        border_inner = (148, 163, 184)
+        title_box_bg = (30, 41, 59)
+        title_box_border = (51, 65, 85)
+        text_dark = (248, 250, 252)  # 白文字
+        text_sub = (148, 163, 184)
+        red_accent = (244, 63, 94)  # 鮮やかレッド
+    elif theme == "プレミアム・ゴールド":
+        overlay_color = (20, 20, 25, 210)  # 高級ブラック
+        border_outer = (217, 119, 6)  # ゴールド
+        border_inner = (251, 191, 36)
+        title_box_bg = (35, 30, 20)
+        title_box_border = (217, 119, 6)
+        text_dark = (254, 243, 199)  # パステルゴールド
+        text_sub = (217, 119, 6)
+        red_accent = (251, 191, 36)  # 金文字
+    else:  # スノー・パステル（標準）
+        overlay_color = (255, 255, 255, 160)  # 明るいホワイト
+        border_outer = (30, 41, 59)
+        border_inner = (71, 85, 105)
+        title_box_bg = (255, 255, 255)
+        title_box_border = (226, 232, 240)
+        text_dark = (15, 23, 42)  # 濃いネイビー
+        text_sub = (51, 65, 85)
+        red_accent = (225, 29, 72)
+
     if bg_file:
         img = Image.open(bg_file).convert("RGB")
         img = img.resize((width, height))
     else:
         img = Image.new("RGB", (width, height), color=(240, 248, 255))
 
-    overlay = Image.new("RGBA", (width, height), (255, 255, 255, 160))
+    overlay = Image.new("RGBA", (width, height), overlay_color)
     img = Image.alpha_composite(img.convert("RGBA"), overlay).convert("RGB")
 
     draw = ImageDraw.Draw(img)
 
     draw.rectangle(
-        [20, 20, width - 20, height - 20], outline=(30, 41, 59), width=3
+        [20, 20, width - 20, height - 20], outline=border_outer, width=3
     )
     draw.rectangle(
-        [26, 26, width - 26, height - 26], outline=(71, 85, 105), width=1
+        [26, 26, width - 26, height - 26], outline=border_inner, width=1
     )
 
     font_path = get_japanese_font()
@@ -425,21 +454,17 @@ def create_card_image(author_name, title, top_words):
             font_rank_item
         ) = font_footer = ImageFont.load_default()
 
-    text_dark = (15, 23, 42)
-    text_sub = (51, 65, 85)
-    red_accent = (225, 29, 72)
-
     # ヘッダーテキスト
     draw.text(
         (50, 45), "うつログ称号ジェネレーター", fill=text_sub, font=font_header
     )
     draw.text((50, 85), f"投稿者: {author_name}", fill=text_dark, font=font_author)
 
-    # 称号（白背景枠＋赤文字）
+    # 称号枠
     draw.rectangle(
         [50, 145, width - 50, 235],
-        fill=(255, 255, 255),
-        outline=(226, 232, 240),
+        fill=title_box_bg,
+        outline=title_box_border,
         width=2,
     )
     draw.text((70, 168), title, fill=red_accent, font=font_title)
@@ -515,76 +540,98 @@ if generate_btn:
             )
 
         if comments:
-            st.success(f"解析完了！ （対象コメント数: {len(comments)}件）")
-
+            st.session_state["comments"] = comments
+            st.session_state["target_author"] = target_author
             title, top_words = generate_nickname(comments)
-
-            st.markdown("---")
-            st.subheader(f"🏷️ `{target_author}` の獲得称号")
-            st.header(f":red[{title}]")
-            st.markdown("---")
-
-            st.subheader("❄️ 特徴的な名詞ランキング 🖋️（Top 5）")
-            for rank_num, (word, count) in enumerate(top_words, 1):
-                st.write(f"**第 {rank_num} 位**: `{word}` （{count} 回出現）")
-
-            st.markdown("---")
-
-            st.subheader("🎴 獲得称号名刺")
-
-            img_bytes = create_card_image(target_author, title, top_words)
-
-            st.image(
-                img_bytes,
-                caption="生成された称号名刺カード",
-                use_container_width=True,
-            )
-
-            st.write("")
-
-            btn_col1, btn_col2 = st.columns([1, 1])
-
-            with btn_col1:
-                st.download_button(
-                    label="💾 名刺画像を保存する",
-                    data=img_bytes,
-                    file_name=f"utsulog_card_{target_author}.png",
-                    mime="image/png",
-                    use_container_width=True,
-                )
-
-            with btn_col2:
-                # ★ ブラウザがアクセスしている実ドメインからURLを自動生成（絶対にリンク切れしない）
-                app_url = "https://utsulog-title-generator.streamlit.app"
-                try:
-                    # Streamlitのコンテキストヘッダーから現在のホスト名を取得
-                    if hasattr(st, "context") and hasattr(
-                        st.context, "headers"
-                    ):
-                        host = st.context.headers.get("host", "")
-                        if host:
-                            app_url = f"https://{host}"
-                except Exception:
-                    pass
-
-                raw_tweet_text = (
-                    f"{target_author} の獲得称号は…\n\n"
-                    f"✨ {title} ✨\n\n"
-                    f"👇 うつログ称号ジェネレーターはこちら！\n"
-                    f"{app_url}\n\n"
-                    f"#うつログ称号ジェネレーター #氷室うつろ"
-                )
-                encoded_text = urllib.parse.quote(raw_tweet_text)
-                tweet_url = f"https://x.com/intent/post?text={encoded_text}"
-
-                st.markdown(
-                    f'<a href="{tweet_url}" target="_blank" class="x-share-btn" style="width: 100%; display: block; text-align: center;">𝕏 に称号をポストする</a>',
-                    unsafe_allow_html=True,
-                )
-
+            st.session_state["title"] = title
+            st.session_state["top_words"] = top_words
         else:
             st.error(
                 "コメントが取得できませんでした。投稿者名を確認してください。"
             )
     else:
         st.warning("投稿者名を入力してね！")
+
+# -------------------------------------------------------------
+# ★ 結果表示＆名刺テーマ切り替えエリア
+# -------------------------------------------------------------
+if "title" in st.session_state:
+    target_author = st.session_state["target_author"]
+    title = st.session_state["title"]
+    top_words = st.session_state["top_words"]
+
+    st.success("解析完了！")
+
+    st.markdown("---")
+    st.subheader(f"🏷️ `{target_author}` の獲得称号")
+    st.header(f":red[{title}]")
+    st.markdown("---")
+
+    st.subheader("❄️ 特徴的な名詞ランキング 🖋️（Top 5）")
+    for rank_num, (word, count) in enumerate(top_words, 1):
+        st.write(f"**第 {rank_num} 位**: `{word}` （{count} 回出現）")
+
+    st.markdown("---")
+
+    st.subheader("🎴 獲得称号名刺")
+
+    # ★ 名刺デザインテーマの選択
+    selected_theme = st.radio(
+        "名刺カードのデザインテーマを選択してください",
+        options=[
+            "❄️ スノー・パステル",
+            "🌑 スタイリッシュ・ダーク",
+            "✨ プレミアム・ゴールド",
+        ],
+        index=0,
+        horizontal=True,
+    )
+
+    theme_name = selected_theme.split(" ")[1]  # テーマ名のみ抽出
+
+    # 選択されたテーマで名刺画像を即座にプレビュー描画
+    img_bytes = create_card_image(
+        target_author, title, top_words, theme=theme_name
+    )
+
+    st.image(
+        img_bytes, caption=f"称号名刺カード（{selected_theme}）", use_container_width=True
+    )
+
+    st.write("")
+
+    btn_col1, btn_col2 = st.columns([1, 1])
+
+    with btn_col1:
+        st.download_button(
+            label="💾 選択した名刺画像を保存する",
+            data=img_bytes,
+            file_name=f"utsulog_card_{target_author}.png",
+            mime="image/png",
+            use_container_width=True,
+        )
+
+    with btn_col2:
+        app_url = "https://utsulog-title-generator.streamlit.app"
+        try:
+            if hasattr(st, "context") and hasattr(st.context, "headers"):
+                host = st.context.headers.get("host", "")
+                if host:
+                    app_url = f"https://{host}"
+        except Exception:
+            pass
+
+        raw_tweet_text = (
+            f"{target_author} の獲得称号は…\n\n"
+            f"✨ {title} ✨\n\n"
+            f"👇 うつログ称号ジェネレーターはこちら！\n"
+            f"{app_url}\n\n"
+            f"#うつログ称号ジェネレーター #氷室うつろ"
+        )
+        encoded_text = urllib.parse.quote(raw_tweet_text)
+        tweet_url = f"https://x.com/intent/post?text={encoded_text}"
+
+        st.markdown(
+            f'<a href="{tweet_url}" target="_blank" class="x-share-btn" style="width: 100%; display: block; text-align: center;">𝕏 に称号をポストする</a>',
+            unsafe_allow_html=True,
+        )
