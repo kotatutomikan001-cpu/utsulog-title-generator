@@ -42,7 +42,7 @@ def get_japanese_font():
 
 
 # -------------------------------------------------------------
-# ★ 背景画像・CSSのデザイン設定
+# ★ 背景画像・CSSのデザイン設定（ダークモード対応強化）
 # -------------------------------------------------------------
 def set_bg_image():
     image_file = None
@@ -116,13 +116,34 @@ def set_bg_image():
         margin-top: 0.8rem;
     }}
 
-    /* 入力フォーム枠を背景画像の上でも見やすくする白枠 */
+    /* 入力フォーム枠（白背景固定） */
     div[data-testid="stTextInput"], div[data-testid="stRadio"], div[data-testid="stButton"] {{
-        background-color: rgba(255, 255, 255, 0.9) !important;
+        background-color: rgba(255, 255, 255, 0.92) !important;
         padding: 1rem !important;
         border-radius: 12px !important;
         margin-bottom: 1rem !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    }}
+
+    /* ★ ダークモード対策：白枠内のすべての文字色を「濃いネイビー/黒」に固定 */
+    div[data-testid="stTextInput"] label, 
+    div[data-testid="stRadio"] label, 
+    div[data-testid="stRadio"] p,
+    div[data-testid="stMarkdownContainer"] p,
+    div[role="radiogroup"] label span {{
+        color: #0f172a !important;
+        font-weight: 600 !important;
+    }}
+
+    /* 入力ボックスの中の文字色 */
+    div[data-testid="stTextInput"] input {{
+        color: #0f172a !important;
+        background-color: #ffffff !important;
+    }}
+
+    /* プレースホルダー文字（「@ユーザー名を入力」）の色 */
+    div[data-testid="stTextInput"] input::placeholder {{
+        color: #64748b !important;
     }}
     
     /* Xシェア用カスタムリンクボタン */
@@ -389,7 +410,7 @@ def generate_nickname(comments):
             f"【雪月花を統べし{top1}と{top2}の絶対神】",
             f"【銀世界に降臨せし{top1}と{top2}の創世主】",
             f"【凍てつく世界を統べる{top1}と{top2}の支配者】",
-            f"【氷の結晶が導く{top1}と{top2}の全知全能の超越者】",  # 修正箇所
+            f"【氷の結晶が導く{top1}と{top2}の全知全能の超越者】",
         ]
     elif count1 >= 30:
         templates = [
