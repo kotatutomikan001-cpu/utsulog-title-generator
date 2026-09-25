@@ -15,7 +15,7 @@ import streamlit as st
 # 1. 画面デザイン・タイトルの設定
 # -------------------------------------------------------------
 st.set_page_config(
-    page_title="うつログ二つ名ジェネレーター",
+    page_title="うつログ称号ジェネレーター",
     page_icon="❄️",
     layout="centered",
 )
@@ -154,8 +154,8 @@ set_bg_image()
 st.markdown(
     """
     <div class="header-box">
-        <h1>❄️ うつログ二つ名ジェネレーター 🖋️</h1>
-        <p>@から始まる投稿者名を入力してボタンを押すと、過去コメントの言葉の傾向を解析して<br>「二つ名」を自動生成します、どんな二つ名が飛び出すかな？</p>
+        <h1>❄️ うつログ称号ジェネレーター 🖋️</h1>
+        <p>@から始まる投稿者名を入力してボタンを押すと、過去コメントの言葉の傾向を解析して<br>「称号」を自動生成します、どんな称号が飛び出すかな？</p>
         <div class="notice-text">
             ※検索機能をお借りしているうつログのサーバー負荷軽減および処理時間短縮のため、解析件数を選択できるようにしています。
         </div>
@@ -261,7 +261,7 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 二つ名生成関数
+# 3. 称号生成関数
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
@@ -382,12 +382,11 @@ def generate_nickname(comments):
 
 
 # -------------------------------------------------------------
-# ★ 名刺画像生成関数（明るい背景画像 ＆ 黒系文字対応）
+# ★ 名刺画像生成関数
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words):
     width, height = 1000, 560
 
-    # 背景画像（bg.png または bg.jpg）を読み込んでそのままリサイズ
     bg_file = None
     if os.path.exists("bg.png"):
         bg_file = "bg.png"
@@ -398,16 +397,13 @@ def create_card_image(author_name, title, top_words):
         img = Image.open(bg_file).convert("RGB")
         img = img.resize((width, height))
     else:
-        # 画像が無い場合は明るいパステルブルー背景
         img = Image.new("RGB", (width, height), color=(240, 248, 255))
 
-    # 文字の視認性を高めるため、全体にほんのり薄い白グラデーション/パネルを敷く
     overlay = Image.new("RGBA", (width, height), (255, 255, 255, 160))
     img = Image.alpha_composite(img.convert("RGBA"), overlay).convert("RGB")
 
     draw = ImageDraw.Draw(img)
 
-    # 枠線（深みのあるネイビー）
     draw.rectangle(
         [20, 20, width - 20, height - 20], outline=(30, 41, 59), width=3
     )
@@ -429,18 +425,17 @@ def create_card_image(author_name, title, top_words):
             font_rank_item
         ) = font_footer = ImageFont.load_default()
 
-    # 黒系〜濃紺のテキストカラー
-    text_dark = (15, 23, 42)  # 濃いネイビー（ほぼ黒）
-    text_sub = (51, 65, 85)  # サブテキスト用グレーネイビー
-    red_accent = (225, 29, 72)  # 二つ名用アクセントレッド
+    text_dark = (15, 23, 42)
+    text_sub = (51, 65, 85)
+    red_accent = (225, 29, 72)
 
     # ヘッダーテキスト
     draw.text(
-        (50, 45), "うつログ二つ名ジェネレーター", fill=text_sub, font=font_header
+        (50, 45), "うつログ称号ジェネレーター", fill=text_sub, font=font_header
     )
     draw.text((50, 85), f"投稿者: {author_name}", fill=text_dark, font=font_author)
 
-    # 二つ名（白背景枠＋濃い赤文字でくっきり表示）
+    # 称号（白背景枠＋赤文字）
     draw.rectangle(
         [50, 145, width - 50, 235],
         fill=(255, 255, 255),
@@ -449,7 +444,6 @@ def create_card_image(author_name, title, top_words):
     )
     draw.text((70, 168), title, fill=red_accent, font=font_title)
 
-    # ★ 記号文字化け回避：テキスト表記での「特徴的な名詞ランキング」
     draw.text(
         (50, 265),
         "◇ 特徴的な名詞ランキング",
@@ -469,7 +463,7 @@ def create_card_image(author_name, title, top_words):
     # フッター
     draw.text(
         (50, 490),
-        "#うつログ二つ名ジェネレーター  |  氷室うつろ非公式ファンツール",
+        "#うつログ称号ジェネレーター  |  氷室うつろ非公式ファンツール",
         fill=text_sub,
         font=font_footer,
     )
@@ -497,8 +491,9 @@ mode = st.radio(
 col1, col2 = st.columns([1, 1])
 
 with col1:
+    # ★ ボタン文言を「称号を獲得する！」に変更
     generate_btn = st.button(
-        "二つ名を自動生成する！", type="primary", use_container_width=True
+        "称号を獲得する！", type="primary", use_container_width=True
     )
 
 if generate_btn:
@@ -530,7 +525,6 @@ if generate_btn:
             st.header(f":red[{title}]")
             st.markdown("---")
 
-            # アプリ画面上の見出しを「❄️ 特徴的な名詞ランキング 🖋️」に更新
             st.subheader("❄️ 特徴的な名詞ランキング 🖋️（Top 5）")
             for rank_num, (word, count) in enumerate(top_words, 1):
                 st.write(f"**第 {rank_num} 位**: `{word}` （{count} 回出現）")
@@ -566,9 +560,9 @@ if generate_btn:
                 raw_tweet_text = (
                     f"{target_author} の獲得称号は…\n\n"
                     f"✨ {title} ✨\n\n"
-                    f"👇 うつログ二つ名ジェネレーターはこちら！\n"
+                    f"👇 うつログ称号ジェネレーターはこちら！\n"
                     f"{app_url}\n\n"
-                    f"#うつログ二つ名ジェネレーター #氷室うつろ"
+                    f"#うつログ称号ジェネレーター #氷室うつろ"
                 )
                 encoded_text = urllib.parse.quote(raw_tweet_text)
                 tweet_url = f"https://x.com/intent/post?text={encoded_text}"
