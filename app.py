@@ -2,6 +2,7 @@ import base64
 from collections import Counter
 import os
 import random
+import shutil
 import time
 from janome.tokenizer import Tokenizer
 from playwright.sync_api import sync_playwright
@@ -126,14 +127,29 @@ st.markdown(
 
 
 # -------------------------------------------------------------
-# 2. コメント取得関数 (Playwright)
+# 2. コメント取得関数 (Playwright / クラウド環境対応)
 # -------------------------------------------------------------
 def fetch_comments_web(author_name, max_scrolls=30):
     url = "https://utsulog.in"
     comments = []
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        # Streamlit Cloud (Linux) 環境でのChromiumパス解決
+        chromium_path = (
+            shutil.which("chromium")
+            or shutil.which("chromium-browser")
+            or "/usr/bin/chromium"
+        )
+
+        if os.path.exists(chromium_path):
+            browser = p.chromium.launch(
+                headless=True,
+                executable_path=chromium_path,
+                args=["--no-sandbox", "--disable-dev-shm-usage"],
+            )
+        else:
+            browser = p.chromium.launch(headless=True)
+
         page = browser.new_page()
         page.goto(url)
         page.wait_for_load_state("networkidle")
