@@ -3,6 +3,7 @@ from collections import Counter
 import io
 import os
 import random
+import re
 import shutil
 import time
 import urllib.parse
@@ -42,7 +43,7 @@ def get_japanese_font():
 
 
 # -------------------------------------------------------------
-# ★ 背景画像・CSSのデザイン設定（ダークモード文字被り完全修復）
+# ★ 背景画像・CSSのデザイン設定
 # -------------------------------------------------------------
 def set_bg_image():
     image_file = None
@@ -83,7 +84,7 @@ def set_bg_image():
         padding-top: 2rem !important;
     }}
 
-    /* ★ 1. 上の黒ウィンドウ枠（常に白文字固定） */
+    /* 上の黒ウィンドウ枠 */
     .header-box {{
         background-color: rgba(15, 23, 42, 0.92) !important;
         color: #ffffff !important;
@@ -116,7 +117,7 @@ def set_bg_image():
         margin-top: 0.8rem !important;
     }}
 
-    /* ★ 2. 下のフォーム枠（白背景固定） */
+    /* 下のフォーム枠（白背景固定） */
     div[data-testid="stTextInput"], div[data-testid="stRadio"], div[data-testid="stButton"] {{
         background-color: rgba(255, 255, 255, 0.92) !important;
         padding: 1rem !important;
@@ -125,7 +126,7 @@ def set_bg_image():
         box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
     }}
 
-    /* ★ フォーム枠内だけの文字を「黒（ネイビー）」に限定固定 */
+    /* フォーム枠内文字色（黒・ネイビー固定） */
     div[data-testid="stTextInput"] label, 
     div[data-testid="stRadio"] label, 
     div[data-testid="stRadio"] p,
@@ -134,13 +135,11 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
-    /* 入力ボックスの中のテキスト */
     div[data-testid="stTextInput"] input {{
         color: #0f172a !important;
         background-color: #ffffff !important;
     }}
 
-    /* プレースホルダー文字の色 */
     div[data-testid="stTextInput"] input::placeholder {{
         color: #64748b !important;
     }}
@@ -281,11 +280,45 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数
+# 3. 称号生成関数（配信固有ワード追加＆絵文字除外フィルター搭載）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
     words = []
+
+    # ★ 優先度順のカスタム名詞（長い語や「様」「ミニ」等のパーツを含む単語を先頭に配置）
+    custom_keywords = [
+        "ミニうつろ",
+        "ねろんが様",
+        "ねろんが",
+        "星めぐり学園",
+        "11月15日",
+        "ラルフさん",
+        "美樹原",
+        "お姉ちゃん",
+        "姉ちゃん",
+        "ワビスケ",
+        "侘助",
+        "鬼武者",
+        "一閃",
+        "リアイベ",
+        "オフイベ",
+        "カス姉",
+        "涅槃",
+        "CCJP",
+        "KONAMI",
+        "コナミ",
+        "CAPCOM",
+        "カプコン",
+        "案件",
+        "DbD",
+        "歌枠",
+        "シレン",
+        "超神髄",
+        "誕生日",
+        "グッズ",
+        "AC",
+    ]
 
     stop_words = {
         "こと",
@@ -339,24 +372,33 @@ def generate_nickname(comments):
         "ナイ形容詞語幹",
     ]
 
+    # ★ 絵文字・特殊記号を除外する正規表現パターン
+    emoji_pattern = re.compile(
+        "["
+        "\U0001f300-\U0001f9ff"  # 記号・絵文字
+        "\U0001fa00-\U0001fa9f"
+        "\u2600-\u27bf"  # 雑記号・絵文字（❄️, 🖋️, 🐸等）
+        "\ufe0f"  # 異体字セレクタ
+        "\u2744"  # ❄︎ (SNOWFLAKE)
+        "]+",
+        flags=re.UNICODE,
+    )
+
     for comment in comments:
-        working_comment = comment
+        # 絵文字や異体字記号を消去
+        working_comment = emoji_pattern.sub("", comment)
 
-        # 「美樹原」の保護抽出
-        if "美樹原" in working_comment:
-            count_ck = working_comment.count("美樹原")
-            for _ in range(count_ck):
-                words.append("美樹原")
-            working_comment = working_comment.replace("美樹原", "")
+        # 1. カスタム名詞の保護抽出（長い順・優先順にチェック）
+        for ck in custom_keywords:
+            if ck in working_comment:
+                count_ck = working_comment.count(ck)
+                # 「姉ちゃん」単体は「お姉ちゃん」に統一
+                target_word = "お姉ちゃん" if ck == "姉ちゃん" else ck
+                for _ in range(count_ck):
+                    words.append(target_word)
+                working_comment = working_comment.replace(ck, "")
 
-        # 「お姉ちゃん」「姉ちゃん」の保護抽出および表記統一
-        for onee_key in ["お姉ちゃん", "姉ちゃん"]:
-            if onee_key in working_comment:
-                count_onee = working_comment.count(onee_key)
-                for _ in range(count_onee):
-                    words.append("お姉ちゃん")
-                working_comment = working_comment.replace(onee_key, "")
-
+        # 2. 通常の形態素解析
         for token in tokenizer.tokenize(working_comment):
             pos_details = token.part_of_speech.split(",")
             pos_main = pos_details[0]
@@ -365,11 +407,20 @@ def generate_nickname(comments):
             if pos_main == "名詞":
                 if pos_sub in allowed_subcategories or pos_sub == "*":
                     word = token.base_form
-                    if len(word) > 1 and word not in stop_words:
+                    # 絵文字・1文字・除外ワードのチェック
+                    if (
+                        len(word) > 1
+                        and word not in stop_words
+                        and not emoji_pattern.search(word)
+                    ):
                         words.append(word)
             elif pos_main == "カスタム名詞" or pos_main == "未知語":
                 word = token.surface
-                if len(word) > 1 and word not in stop_words:
+                if (
+                    len(word) > 1
+                    and word not in stop_words
+                    and not emoji_pattern.search(word)
+                ):
                     words.append(word)
 
     word_counts = Counter(words)
