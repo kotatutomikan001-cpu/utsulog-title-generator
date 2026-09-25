@@ -261,13 +261,12 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（「美樹原」などの分割対策補正を追加）
+# 3. 称号生成関数（同率1位3つ以上の限定称号ロジック搭載）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
     words = []
 
-    # 形態素解析で誤分割されやすい固有の単語リスト
     custom_keywords = ["美樹原"]
 
     stop_words = {
@@ -325,7 +324,6 @@ def generate_nickname(comments):
     for comment in comments:
         working_comment = comment
 
-        # 事前にカスタムキーワード（美樹原など）の出現を検知して抽出し、元テキストから一時除去
         for ck in custom_keywords:
             if ck in working_comment:
                 count_ck = working_comment.count(ck)
@@ -354,6 +352,26 @@ def generate_nickname(comments):
     if not top_words:
         return "【静寂を愛する雪原の通行人】", top_words
 
+    # ★ 同率1位の判定処理
+    max_count = top_words[0][1]
+    top_tier_words = [word for word, count in top_words if count == max_count]
+
+    # ★ 1位が3つ以上同率の場合の限定称号ロジック！
+    if len(top_tier_words) >= 3:
+        t1, t2, t3 = (
+            top_tier_words[0],
+            top_tier_words[1],
+            top_tier_words[2],
+        )
+        special_templates = [
+            f"【{t1}と{t2}と{t3}が織りなす百花繚乱の語り部】",
+            f"【{t1}・{t2}・{t3}を統べし三位一体の絶対者】",
+            f"【{t1}・{t2}・{t3}が咲き乱れる言葉の絢爛】",
+            f"【{t1}も{t2}も{t3}も愛する万能の雪原知識人】",
+        ]
+        return random.choice(special_templates), top_words
+
+    # 通常の2単語称号ロジック
     top1, count1 = top_words[0]
     top2 = (
         top_words[1][0]
@@ -463,7 +481,7 @@ def create_card_image(author_name, title, top_words, theme="スノー・パス�
     if font_path:
         font_header = ImageFont.truetype(font_path, 22)
         font_author = ImageFont.truetype(font_path, 32)
-        font_title = ImageFont.truetype(font_path, 32)
+        font_title = ImageFont.truetype(font_path, 30)
         font_rank_head = ImageFont.truetype(font_path, 24)
         font_rank_item = ImageFont.truetype(font_path, 22)
         font_footer = ImageFont.truetype(font_path, 18)
@@ -483,7 +501,7 @@ def create_card_image(author_name, title, top_words, theme="スノー・パス�
         outline=title_box_border,
         width=2,
     )
-    draw.text((70, 168), title, fill=red_accent, font=font_title)
+    draw.text((70, 170), title, fill=red_accent, font=font_title)
 
     draw.text(
         (50, 265),
@@ -491,11 +509,20 @@ def create_card_image(author_name, title, top_words, theme="スノー・パス�
         fill=text_dark,
         font=font_rank_head,
     )
+
+    # ★ 同率順位の計算と名刺画像への描画
     y_pos = 310
-    for idx, (word, count) in enumerate(top_words[:3], 1):
+    current_rank = 1
+    for idx, (word, count) in enumerate(top_words[:3]):
+        if idx > 0 and count == top_words[idx - 1][1]:
+            rank_str = f"第 {current_rank} 位(同率)"
+        else:
+            current_rank = idx + 1
+            rank_str = f"第 {current_rank} 位"
+
         draw.text(
             (70, y_pos),
-            f"第 {idx} 位:   {word}   ({count} 回)",
+            f"{rank_str}:   {word}   ({count} 回)",
             fill=text_dark,
             font=font_rank_item,
         )
@@ -583,8 +610,17 @@ if "title" in st.session_state:
     st.markdown("---")
 
     st.subheader("❄️ 特徴的な名詞ランキング 🖋️（Top 5）")
-    for rank_num, (word, count) in enumerate(top_words, 1):
-        st.write(f"**第 {rank_num} 位**: `{word}` （{count} 回出現）")
+
+    # ★ 同率順位の可視化ロジック
+    current_rank = 1
+    for idx, (word, count) in enumerate(top_words, 0):
+        if idx > 0 and count == top_words[idx - 1][1]:
+            rank_label = f"👑 第 {current_rank} 位 (同率)"
+        else:
+            current_rank = idx + 1
+            rank_label = f"第 {current_rank} 位"
+
+        st.write(f"**{rank_label}**: `{word}` （{count} 回出現）")
 
     st.markdown("---")
 
