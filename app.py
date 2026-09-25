@@ -127,14 +127,13 @@ st.markdown(
 
 
 # -------------------------------------------------------------
-# 2. コメント取得関数 (Playwright / 超高速化＆クラウド対応版)
+# 2. コメント取得関数 (件数しっかり取得＆安全な高速化)
 # -------------------------------------------------------------
-def fetch_comments_web(author_name, max_scrolls=30):
+def fetch_comments_web(author_name, max_scrolls=40):
     url = "https://utsulog.in"
     comments = []
 
     with sync_playwright() as p:
-        # Streamlit Cloud (Linux) 環境でのChromiumパス解決
         chromium_path = (
             shutil.which("chromium")
             or shutil.which("chromium-browser")
@@ -150,12 +149,12 @@ def fetch_comments_web(author_name, max_scrolls=30):
         else:
             browser = p.chromium.launch(headless=True)
 
-        # ★ 画像・フォント等の非テキストリソースを遮断して読み込みスピードを爆速化
         context = browser.new_context()
         page = context.new_page()
+
+        # 画像のみ遮断して軽量化（スクリプトやCSSは読み込ませて無限スクロールを正常動作させる）
         page.route(
-            "**/*.{png,jpg,jpeg,gif,svg,webp,css,woff,woff2,ttf,otf}",
-            lambda route: route.abort(),
+            "**/*.{png,jpg,jpeg,gif,svg,webp}", lambda route: route.abort()
         )
 
         page.goto(url, wait_until="domcontentloaded")
@@ -171,7 +170,7 @@ def fetch_comments_web(author_name, max_scrolls=30):
 
             author_input.fill(author_name)
             author_input.press("Enter")
-            time.sleep(1.5)
+            time.sleep(2.0)  # 最初の検索結果読み込みをしっかり待つ
         except Exception:
             browser.close()
             return []
@@ -193,22 +192,24 @@ def fetch_comments_web(author_name, max_scrolls=30):
             )
 
             if current_count == 0:
-                time.sleep(0.5)
+                time.sleep(1.0)
                 continue
 
+            # 変化がない場合の判定猶予を広げる
             if current_count == prev_count:
                 same_count_turns += 1
-                if same_count_turns >= 3:
+                if same_count_turns >= 4:
                     break
             else:
                 same_count_turns = 0
 
             prev_count = current_count
 
+            # 下部へスクロール後、うつログ側からの追加レスポンスを1秒確実に待つ
             last_elem = comment_elements[-1]
             last_elem.scroll_into_view_if_needed()
             page.keyboard.press("PageDown")
-            time.sleep(0.5)
+            time.sleep(1.0)
 
         final_elements = page.query_selector_all("p.text-slate-700")
         for elem in final_elements:
@@ -258,7 +259,7 @@ def generate_nickname(comments):
         "みたい",
         "んじゃ",
         "はず",
-        "分け",
+        "わけ",
         "どこ",
         "そこ",
         "あっち",
