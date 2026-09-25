@@ -382,48 +382,56 @@ def generate_nickname(comments):
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（3パターン対応）
+# ★ テーマ別名刺画像生成関数（個別背景画像対応）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="スノー・パステル"):
     width, height = 1000, 560
 
-    bg_file = None
-    if os.path.exists("bg.png"):
-        bg_file = "bg.png"
+    # テーマに応じた個別画像ファイルを探す
+    specific_bg_file = None
+    if theme == "スタイリッシュ・ダーク" and os.path.exists("bg_dark.png"):
+        specific_bg_file = "bg_dark.png"
+    elif theme == "プレミアム・ゴールド" and os.path.exists("bg_gold.png"):
+        specific_bg_file = "bg_gold.png"
+    elif theme == "スノー・パステル" and os.path.exists("bg_snow.png"):
+        specific_bg_file = "bg_snow.png"
+    elif os.path.exists("bg.png"):
+        specific_bg_file = "bg.png"
     elif os.path.exists("bg.jpg"):
-        bg_file = "bg.jpg"
+        specific_bg_file = "bg.jpg"
 
-    # テーマ設定の定義
+    # テーマごとの配色パラメータ設定
     if theme == "スタイリッシュ・ダーク":
-        overlay_color = (15, 23, 42, 230)  # ダークネイビー重め
+        overlay_color = (15, 23, 42, 220)  # ダークネイビー
         border_outer = (51, 65, 85)
         border_inner = (148, 163, 184)
         title_box_bg = (30, 41, 59)
         title_box_border = (51, 65, 85)
-        text_dark = (248, 250, 252)  # 白文字
+        text_dark = (248, 250, 252)  # 白テキスト
         text_sub = (148, 163, 184)
-        red_accent = (244, 63, 94)  # 鮮やかレッド
+        red_accent = (244, 63, 94)  # ビビッドレッド
     elif theme == "プレミアム・ゴールド":
-        overlay_color = (20, 20, 25, 210)  # 高級ブラック
+        overlay_color = (20, 20, 25, 210)  # シックブラック
         border_outer = (217, 119, 6)  # ゴールド
         border_inner = (251, 191, 36)
         title_box_bg = (35, 30, 20)
         title_box_border = (217, 119, 6)
-        text_dark = (254, 243, 199)  # パステルゴールド
+        text_dark = (254, 243, 199)  # シャンパンゴールド
         text_sub = (217, 119, 6)
-        red_accent = (251, 191, 36)  # 金文字
+        red_accent = (251, 191, 36)  # ゴールドアクセント
     else:  # スノー・パステル（標準）
-        overlay_color = (255, 255, 255, 160)  # 明るいホワイト
+        overlay_color = (255, 255, 255, 160)  # ライトホワイト
         border_outer = (30, 41, 59)
         border_inner = (71, 85, 105)
         title_box_bg = (255, 255, 255)
         title_box_border = (226, 232, 240)
-        text_dark = (15, 23, 42)  # 濃いネイビー
+        text_dark = (15, 23, 42)  # ダークネイビー
         text_sub = (51, 65, 85)
         red_accent = (225, 29, 72)
 
-    if bg_file:
-        img = Image.open(bg_file).convert("RGB")
+    # 背景描画
+    if specific_bg_file:
+        img = Image.open(specific_bg_file).convert("RGB")
         img = img.resize((width, height))
     else:
         img = Image.new("RGB", (width, height), color=(240, 248, 255))
@@ -587,9 +595,9 @@ if "title" in st.session_state:
         horizontal=True,
     )
 
-    theme_name = selected_theme.split(" ")[1]  # テーマ名のみ抽出
+    theme_name = selected_theme.split(" ")[1]
 
-    # 選択されたテーマで名刺画像を即座にプレビュー描画
+    # 選択テーマで即時生成
     img_bytes = create_card_image(
         target_author, title, top_words, theme=theme_name
     )
