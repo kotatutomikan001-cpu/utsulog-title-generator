@@ -127,9 +127,9 @@ st.markdown(
 
 
 # -------------------------------------------------------------
-# 2. コメント取得関数 (モード選択対応版)
+# 2. コメント取得関数 (500件／3000件設定対応)
 # -------------------------------------------------------------
-def fetch_comments_web(author_name, max_scrolls=30, scroll_delay=1.0):
+def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
     url = "https://utsulog.in"
     comments = []
 
@@ -170,7 +170,7 @@ def fetch_comments_web(author_name, max_scrolls=30, scroll_delay=1.0):
 
             author_input.fill(author_name)
             author_input.press("Enter")
-            time.sleep(1.5)
+            time.sleep(1.2)
         except Exception:
             browser.close()
             return []
@@ -192,7 +192,7 @@ def fetch_comments_web(author_name, max_scrolls=30, scroll_delay=1.0):
             )
 
             if current_count == 0:
-                time.sleep(0.8)
+                time.sleep(0.5)
                 continue
 
             if current_count == prev_count:
@@ -229,7 +229,6 @@ def generate_nickname(comments):
     tokenizer = Tokenizer()
     words = []
 
-    # 意味の薄い一般的な単語を除外
     stop_words = {
         "こと",
         "よう",
@@ -304,7 +303,6 @@ def generate_nickname(comments):
         else ("言葉" if top1 != "言葉" else "話題")
     )
 
-    # 氷室うつろモチーフの称号テンプレート
     if count1 >= 50:
         rank = "【GOD級】"
         rank_range = "50回以上"
@@ -375,12 +373,13 @@ if generate_btn:
             raw_author if raw_author.startswith("@") else f"@{raw_author}"
         )
 
+        # 500件（スクロール5回）/ 3000件（スクロール30回）の設定
         if "爆速" in mode:
-            max_s = 15
-            delay = 0.6
+            max_s = 5
+            delay = 0.5
         else:
-            max_s = 40
-            delay = 1.0
+            max_s = 30
+            delay = 0.9
 
         with st.spinner("うつログにアクセス中..."):
             comments = fetch_comments_web(
