@@ -1,10 +1,12 @@
 import base64
 from collections import Counter
+import io
 import os
 import random
 import shutil
 import time
 from janome.tokenizer import Tokenizer
+from PIL import Image, ImageDraw, ImageFont
 from playwright.sync_api import sync_playwright
 import streamlit as st
 
@@ -101,6 +103,22 @@ def set_bg_image():
         margin-bottom: 1rem !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
     }}
+    
+    /* Xシェア用カスタムリンクボタン */
+    .x-share-btn {{
+        display: inline-block;
+        background-color: #000000;
+        color: #ffffff !important;
+        font-weight: bold;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }}
+    .x-share-btn:hover {{
+        background-color: #333333;
+    }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
@@ -127,7 +145,7 @@ st.markdown(
 
 
 # -------------------------------------------------------------
-# 2. コメント取得関数 (500件／3000件設定対応)
+# 2. コメント取得関数
 # -------------------------------------------------------------
 def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
     url = "https://utsulog.in"
@@ -152,7 +170,6 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
         context = browser.new_context()
         page = context.new_page()
 
-        # 画像のみ遮断して軽量化
         page.route(
             "**/*.{png,jpg,jpeg,gif,svg,webp}", lambda route: route.abort()
         )
@@ -223,13 +240,12 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 二つ名生成関数（名詞認識範囲・拡大版）
+# 3. 二つ名生成関数
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
     words = []
 
-    # 二つ名として意味をなさない一般的な指示語や助詞由来のみを除外
     stop_words = {
         "こと",
         "よう",
@@ -274,7 +290,6 @@ def generate_nickname(comments):
         "明日",
     }
 
-    # ★ 抽出対象とする名詞の細分類リスト（固有名詞やサ変接続なども幅広く許可）
     allowed_subcategories = [
         "一般",
         "固有名詞",
@@ -289,7 +304,6 @@ def generate_nickname(comments):
             pos_main = pos_details[0]
             pos_sub = pos_details[1]
 
-            # 名詞（および辞書未登録の未知語）を広く認識
             if pos_main == "名詞":
                 if pos_sub in allowed_subcategories or pos_sub == "*":
                     word = token.base_form
@@ -347,6 +361,85 @@ def generate_nickname(comments):
 
 
 # -------------------------------------------------------------
+# ★ 名刺画像生成関数 (Pillow)
+# -------------------------------------------------------------
+def create_card_image(author_name, title, top_words):
+    width, height = 1000, 560
+    # ダークネイビー〜ブルー系のシックなグラデーション風背景
+    img = Image.new("RGB", (width, height), color=(15, 23, 42))
+    draw = ImageDraw.Draw(img)
+
+    # 枠線
+    draw.rectangle(
+        [20, 20, width - 20, height - 20], outline=(51, 65, 85), width=3
+    )
+    draw.rectangle(
+        [26, 26, width - 26, height - 26], outline=(148, 163, 184), width=1
+    )
+
+    # フォントの設定（Linux標準フォントを使用）
+    font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+    if not os.path.exists(font_path):
+        font_path = None
+
+    try:
+        font_title = (
+            ImageFont.truetype(font_path, 36)
+            if font_path
+            else ImageFont.load_default()
+        )
+        font_author = (
+            ImageFont.truetype(font_path, 28)
+            if font_path
+            else ImageFont.load_default()
+        )
+        font_body = (
+            ImageFont.truetype(font_path, 22)
+            if font_path
+            else ImageFont.load_default()
+        )
+        font_footer = (
+            ImageFont.truetype(font_path, 18)
+            if font_path
+            else ImageFont.load_default()
+        )
+    except Exception:
+        font_title = font_author = font_body = font_footer = (
+            ImageFont.load_default()
+        )
+
+    # ヘッダーテキスト
+    draw.text((50, 45), "❄️ うつログ 獲得称号名刺", fill=(148, 163, 184))
+    draw.text((50, 95), f"投稿者: {author_name}", fill=(248, 250, 252))
+
+    # 二つ名（赤枠アクセント）
+    draw.rectangle([50, 150, width - 50, 240], fill=(30, 41, 59))
+    draw.text((70, 172), title, fill=(244, 63, 94))
+
+    # 特徴的単語Top 5
+    draw.text((50, 270), "📊 特徴的な名詞ランキング", fill=(226, 232, 240))
+    y_pos = 315
+    for idx, (word, count) in enumerate(top_words[:3], 1):
+        draw.text(
+            (70, y_pos),
+            f"第 {idx} 位:  {word}  ({count} 回)",
+            fill=(203, 213, 225),
+        )
+        y_pos += 45
+
+    # フッター
+    draw.text(
+        (50, 490),
+        "#うつログ二つ名ジェネレーター  |  氷室うつろ非公式ファンツール",
+        fill=(100, 116, 139),
+    )
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
+
+
+# -------------------------------------------------------------
 # 4. 画面上の操作UI部分
 # -------------------------------------------------------------
 input_name = st.text_input(
@@ -400,6 +493,41 @@ if generate_btn:
             st.subheader("📊 特徴的な名詞ランキング（Top 5）")
             for rank_num, (word, count) in enumerate(top_words, 1):
                 st.write(f"**第 {rank_num} 位**: `{word}` （{count} 回出現）")
+
+            st.markdown("---")
+
+            # ★ 名刺画像生成 ＆ ダウンロード ＆ X投稿エリア
+            st.subheader("🎴 名刺画像の作成・X（Twitter）共有")
+
+            img_bytes = create_card_image(target_author, title, top_words)
+
+            btn_col1, btn_col2 = st.columns([1, 1])
+
+            with btn_col1:
+                st.download_button(
+                    label="🎴 名刺画像をダウンロード",
+                    data=img_bytes,
+                    file_name=f"utsulog_card_{target_author}.png",
+                    mime="image/png",
+                    use_container_width=True,
+                )
+
+            with btn_col2:
+                # X（Twitter）投稿リンク用テキストの作成
+                tweet_text = (
+                    f"{target_author} の獲得称号は…\n\n"
+                    f"✨ {title} ✨\n\n"
+                    f"#うつログ二つ名ジェネレーター #氷室うつろ\n"
+                )
+                encoded_tweet = base64.b64encode(tweet_text.encode()).decode()
+                import urllib.parse
+
+                tweet_url = f"https://twitter.com/intent/tweet?text={urllib.parse.quote(tweet_text)}"
+
+                st.markdown(
+                    f'<a href="{tweet_url}" target="_blank" class="x-share-btn" style="width: 100%; display: block; text-align: center;">𝕏 に称号をポストする</a>',
+                    unsafe_allow_html=True,
+                )
 
         else:
             st.error(
