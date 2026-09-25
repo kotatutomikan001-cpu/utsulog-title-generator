@@ -261,11 +261,14 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数
+# 3. 称号生成関数（「美樹原」などの分割対策補正を追加）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
     words = []
+
+    # 形態素解析で誤分割されやすい固有の単語リスト
+    custom_keywords = ["美樹原"]
 
     stop_words = {
         "こと",
@@ -320,7 +323,17 @@ def generate_nickname(comments):
     ]
 
     for comment in comments:
-        for token in tokenizer.tokenize(comment):
+        working_comment = comment
+
+        # 事前にカスタムキーワード（美樹原など）の出現を検知して抽出し、元テキストから一時除去
+        for ck in custom_keywords:
+            if ck in working_comment:
+                count_ck = working_comment.count(ck)
+                for _ in range(count_ck):
+                    words.append(ck)
+                working_comment = working_comment.replace(ck, "")
+
+        for token in tokenizer.tokenize(working_comment):
             pos_details = token.part_of_speech.split(",")
             pos_main = pos_details[0]
             pos_sub = pos_details[1]
@@ -382,12 +395,11 @@ def generate_nickname(comments):
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（個別背景画像対応）
+# ★ テーマ別名刺画像生成関数
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="スノー・パステル"):
     width, height = 1000, 560
 
-    # テーマに応じた個別画像ファイルを探す
     specific_bg_file = None
     if theme == "スタイリッシュ・ダーク" and os.path.exists("bg_dark.png"):
         specific_bg_file = "bg_dark.png"
@@ -400,36 +412,34 @@ def create_card_image(author_name, title, top_words, theme="スノー・パス�
     elif os.path.exists("bg.jpg"):
         specific_bg_file = "bg.jpg"
 
-    # テーマごとの配色パラメータ設定
     if theme == "スタイリッシュ・ダーク":
-        overlay_color = (15, 23, 42, 220)  # ダークネイビー
+        overlay_color = (15, 23, 42, 220)
         border_outer = (51, 65, 85)
         border_inner = (148, 163, 184)
         title_box_bg = (30, 41, 59)
         title_box_border = (51, 65, 85)
-        text_dark = (248, 250, 252)  # 白テキスト
+        text_dark = (248, 250, 252)
         text_sub = (148, 163, 184)
-        red_accent = (244, 63, 94)  # ビビッドレッド
+        red_accent = (244, 63, 94)
     elif theme == "プレミアム・ゴールド":
-        overlay_color = (20, 20, 25, 210)  # シックブラック
-        border_outer = (217, 119, 6)  # ゴールド
+        overlay_color = (20, 20, 25, 210)
+        border_outer = (217, 119, 6)
         border_inner = (251, 191, 36)
         title_box_bg = (35, 30, 20)
         title_box_border = (217, 119, 6)
-        text_dark = (254, 243, 199)  # シャンパンゴールド
+        text_dark = (254, 243, 199)
         text_sub = (217, 119, 6)
-        red_accent = (251, 191, 36)  # ゴールドアクセント
-    else:  # スノー・パステル（標準）
-        overlay_color = (255, 255, 255, 160)  # ライトホワイト
+        red_accent = (251, 191, 36)
+    else:
+        overlay_color = (255, 255, 255, 160)
         border_outer = (30, 41, 59)
         border_inner = (71, 85, 105)
         title_box_bg = (255, 255, 255)
         title_box_border = (226, 232, 240)
-        text_dark = (15, 23, 42)  # ダークネイビー
+        text_dark = (15, 23, 42)
         text_sub = (51, 65, 85)
         red_accent = (225, 29, 72)
 
-    # 背景描画
     if specific_bg_file:
         img = Image.open(specific_bg_file).convert("RGB")
         img = img.resize((width, height))
@@ -462,13 +472,11 @@ def create_card_image(author_name, title, top_words, theme="スノー・パス�
             font_rank_item
         ) = font_footer = ImageFont.load_default()
 
-    # ヘッダーテキスト
     draw.text(
         (50, 45), "うつログ称号ジェネレーター", fill=text_sub, font=font_header
     )
     draw.text((50, 85), f"投稿者: {author_name}", fill=text_dark, font=font_author)
 
-    # 称号枠
     draw.rectangle(
         [50, 145, width - 50, 235],
         fill=title_box_bg,
@@ -493,7 +501,6 @@ def create_card_image(author_name, title, top_words, theme="スノー・パス�
         )
         y_pos += 42
 
-    # フッター
     draw.text(
         (50, 490),
         "#うつログ称号ジェネレーター  |  氷室うつろ非公式ファンツール",
@@ -583,7 +590,6 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
-    # ★ 名刺デザインテーマの選択
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
         options=[
@@ -597,7 +603,6 @@ if "title" in st.session_state:
 
     theme_name = selected_theme.split(" ")[1]
 
-    # 選択テーマで即時生成
     img_bytes = create_card_image(
         target_author, title, top_words, theme=theme_name
     )
