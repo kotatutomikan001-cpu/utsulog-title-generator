@@ -2,7 +2,6 @@ import base64
 from collections import Counter
 import io
 import os
-import random
 import re
 import shutil
 import time
@@ -280,7 +279,7 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（「星めぐり学園」表記修正版）
+# 3. 称号生成関数（決定論的固定ロジック搭載版）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
@@ -447,6 +446,11 @@ def generate_nickname(comments):
     if not top_words:
         return "【静寂を愛する雪原の通行人】", top_words
 
+    # ★ 内部規則用計算（出現回数の合計 ＋ メイン単語の文字コード和）
+    total_count_sum = sum([count for word, count in top_words])
+    primary_word_code = sum([ord(c) for c in top_words[0][0]])
+    hash_value = total_count_sum + primary_word_code
+
     # 同率1位の判定処理
     max_count = top_words[0][1]
     top_tier_words = [word for word, count in top_words if count == max_count]
@@ -464,7 +468,9 @@ def generate_nickname(comments):
             f"【{t1}・{t2}・{t3}の言葉を極めし賢者】",
             f"【{t1}も{t2}も{t3}も愛する万能の雪原知識人】",
         ]
-        return random.choice(special_templates), top_words
+        # ハッシュ値に基づく規則的インデックス選択（固定）
+        selected_idx = hash_value % len(special_templates)
+        return special_templates[selected_idx], top_words
 
     top1, count1 = top_words[0]
     top2 = (
@@ -502,7 +508,10 @@ def generate_nickname(comments):
             f"【氷室の風に乗せて{top1}と{top2}を届ける案内人】",
         ]
 
-    selected_title = random.choice(templates)
+    # ハッシュ値に基づく規則的インデックス選択（固定）
+    selected_idx = hash_value % len(templates)
+    selected_title = templates[selected_idx]
+
     return selected_title, top_words
 
 
