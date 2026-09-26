@@ -79,7 +79,7 @@ def set_bg_image():
     
     /* メインエリア幅 */
     .main .block-container {{
-        max-width: 760px !important;
+        max-width: 720px !important;
         padding-top: 2rem !important;
     }}
 
@@ -99,7 +99,6 @@ def set_bg_image():
         font-size: 1.8rem !important;
         margin-bottom: 1rem !important;
         line-height: 1.4 !important;
-        text-align: center !important;
     }}
 
     /* ルビ（ふりがな）用スタイリング */
@@ -129,28 +128,13 @@ def set_bg_image():
         margin-top: 0.8rem !important;
     }}
 
-    /* ★ コンテナ要素ごとの中央揃え指定 */
-    div.element-container:has(div[data-testid="stTextInput"]),
-    div.element-container:has(div[data-testid="stButton"]),
-    div.element-container:has(div.mode-radio-wrap),
-    div.element-container:has(div.theme-radio-wrap) {{
-        display: flex !important;
-        justify-content: center !important;
-        width: 100% !important;
-    }}
-
-    /* ★ 入力枠・ボタンの基本デザイン（幅440px） */
-    div[data-testid="stTextInput"], 
-    div[data-testid="stButton"] {{
-        background-color: #ffffff !important;
+    /* 下のフォーム枠（白背景・美しいカード枠復元） */
+    div[data-testid="stTextInput"], div[data-testid="stRadio"], div[data-testid="stButton"] {{
+        background-color: rgba(255, 255, 255, 0.95) !important;
         padding: 1rem 1.25rem !important;
         border-radius: 12px !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
         margin-bottom: 1rem !important;
-        max-width: 440px !important;
-        width: 100% !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
         box-sizing: border-box !important;
     }}
 
@@ -163,103 +147,13 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
-    /* -------------------------------------------------------------
-     * ★ ① 解析モード選択（幅440px・白背景・角丸・影・縦並び）
-     * ------------------------------------------------------------- */
-    div.mode-radio-wrap div[data-testid="stRadio"] {{
-        background-color: #ffffff !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 12px !important;
-        padding: 1rem 1.25rem !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-        margin-bottom: 1rem !important;
-        max-width: 440px !important;
-        width: 100% !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
-        box-sizing: border-box !important;
-    }}
-
-    div.mode-radio-wrap div[role="radiogroup"] {{
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 0.5rem !important;
-        width: 100% !important;
-    }}
-
-    /* -------------------------------------------------------------
-     * ★ ② 名刺テーマ選択（幅700px・白背景・角丸・影・横1行固定）
-     * ------------------------------------------------------------- */
-    div.theme-radio-wrap div[data-testid="stRadio"] {{
-        background-color: #ffffff !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 12px !important;
-        padding: 1rem 1.25rem !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-        margin-bottom: 1.5rem !important;
-        max-width: 700px !important;
-        width: 100% !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
-        box-sizing: border-box !important;
-    }}
-
-    div.theme-radio-wrap div[role="radiogroup"] {{
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        gap: 0.4rem !important;
-        width: 100% !important;
-        overflow-x: auto !important;
-    }}
-
-    div.theme-radio-wrap div[role="radiogroup"] label {{
-        white-space: nowrap !important;
-        flex-shrink: 0 !important;
-    }}
-
     div[data-testid="stTextInput"] input {{
         color: #0f172a !important;
         background-color: #ffffff !important;
-        text-align: center !important;
     }}
 
     div[data-testid="stTextInput"] input::placeholder {{
         color: #64748b !important;
-    }}
-
-    /* 称号獲得ボタン内部 */
-    div[data-testid="stButton"] button {{
-        background-color: #e11d48 !important;
-        color: #ffffff !important;
-        border: none !important;
-        font-weight: bold !important;
-        padding: 0.6rem 1rem !important;
-        border-radius: 8px !important;
-        width: 100% !important;
-    }}
-    div[data-testid="stButton"] button:hover {{
-        background-color: #be123c !important;
-    }}
-
-    /* ★ 解析完了の独自メッセージカード */
-    .custom-success-box {{
-        background-color: rgba(240, 253, 244, 0.95) !important;
-        border: 1px solid #86efac !important;
-        color: #166534 !important;
-        font-weight: bold !important;
-        font-size: 1rem !important;
-        padding: 0.8rem 1.25rem !important;
-        border-radius: 12px !important;
-        max-width: 440px !important;
-        width: 100% !important;
-        margin: 0 auto 1.5rem auto !important;
-        text-align: center !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
-        box-sizing: border-box !important;
     }}
     
     /* Xシェア用カスタムリンクボタン */
@@ -691,7 +585,7 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（「おまさい」称号背景透過版）
+# ★ テーマ別名刺画像生成関数（「おまさい」称号枠薄い水色版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -734,8 +628,9 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         border_outer = (51, 65, 85, 220)
         border_inner = (148, 163, 184, 220)
 
-        title_box_bg = (224, 242, 254, 140)
-        title_box_border = (186, 230, 253, 200)
+        # 「おまさい」テーマ用：薄い水色（パステルブルー）の称号背景
+        title_box_bg = (224, 242, 254, 230)
+        title_box_border = (186, 230, 253, 255)
 
         text_dark = (15, 23, 42)
         text_sub = (71, 85, 105)
@@ -749,6 +644,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         border_outer = (51, 65, 85, 200)
         border_inner = (148, 163, 184, 200)
 
+        # 「うつろ」テーマ群用：半透明の白背景
         title_box_bg = (255, 255, 255, 210)
         title_box_border = (203, 213, 225, 220)
 
@@ -771,11 +667,12 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         font_ruby = ImageFont.truetype(font_path, 13)
         font_header = ImageFont.truetype(font_path, 22)
         font_author = ImageFont.truetype(font_path, 32)
+        font_title = ImageFont.truetype(font_path, 30)
         font_rank_head = ImageFont.truetype(font_path, 24)
         font_rank_item = ImageFont.truetype(font_path, 22)
         font_footer = ImageFont.truetype(font_path, 18)
     else:
-        font_ruby = font_header = font_author = font_rank_head = (
+        font_ruby = font_header = font_author = font_title = font_rank_head = (
             font_rank_item
         ) = font_footer = ImageFont.load_default()
 
@@ -811,7 +708,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         outline_range=outline_r,
     )
 
-    # 3. 称号枠の描画
+    # 3. 称号枠
     draw.rectangle(
         [50, 145, width - 50, 235],
         fill=title_box_bg,
@@ -819,43 +716,10 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         width=2,
     )
 
-    # 称号の1行収容＆中央寄せ（センタリング）計算
-    max_title_width = (width - 50) - 70 - 20  # 860px
-    target_font_size = 30
-    final_text_w = 0
-
-    if font_path:
-        while target_font_size >= 12:
-            test_font = ImageFont.truetype(font_path, target_font_size)
-            try:
-                bbox = test_font.getbbox(title)
-                text_w = bbox[2] - bbox[0]
-            except Exception:
-                text_w = target_font_size * len(title)
-
-            if text_w <= max_title_width:
-                font_title = test_font
-                final_text_w = text_w
-                break
-            target_font_size -= 1
-        else:
-            font_title = ImageFont.truetype(font_path, 12)
-            final_text_w = max_title_width
-    else:
-        font_title = ImageFont.load_default()
-        final_text_w = target_font_size * len(title)
-
-    title_x = int((width - final_text_w) / 2)
-    title_y = 170 + int((30 - target_font_size) * 0.45)
-
+    # 全テーマ共通で赤系（red_accent）に統一
     title_text_color = red_accent
     draw_text_with_outline(
-        draw,
-        (title_x, title_y),
-        title,
-        font_title,
-        title_text_color,
-        outline_range=0,
+        draw, (70, 170), title, font_title, title_text_color, outline_range=0
     )
 
     # 4. ランキング見出し
@@ -917,19 +781,18 @@ input_name = st.text_input(
     placeholder="@ユーザー名を入力",
 )
 
-# ★ 解析モード選択（ラッパーで包み込んでCSSで完全同期）
-st.markdown('<div class="mode-radio-wrap">', unsafe_allow_html=True)
 mode = st.radio(
     "解析モードを選択してください",
-    options=[
-        "⚡ 爆速モード（直近〜500件程度）",
-        "🐢 じっくり解析モード（直近〜3000件程度）",
-    ],
+    options=["⚡ 爆速モード（直近〜500件程度）", "🐢 じっくり解析モード（直近〜3000件程度）"],
     index=0,
 )
-st.markdown("</div>", unsafe_allow_html=True)
 
-generate_btn = st.button("称号を獲得する！", type="primary")
+col1, col2 = st.columns([1, 1])
+
+with col1:
+    generate_btn = st.button(
+        "称号を獲得する！", type="primary", use_container_width=True
+    )
 
 if generate_btn:
     raw_author = input_name.strip()
@@ -971,33 +834,11 @@ if "title" in st.session_state:
     title = st.session_state["title"]
     top_words = st.session_state["top_words"]
 
-    st.markdown(
-        '<div class="custom-success-box">解析完了！</div>',
-        unsafe_allow_html=True,
-    )
+    st.success("解析完了！")
 
     st.markdown("---")
     st.subheader(f"🏷️ `{target_author}` の獲得称号")
-
-    # 称号が文字数に応じて自動的にフォントサイズ補正され、1行に収まるスタイリング
-    title_len = max(len(title), 1)
-    st.markdown(
-        f"""
-        <div style="
-            text-align: center;
-            font-size: min(1.8rem, calc(82vw / {title_len}));
-            font-weight: bold;
-            color: #e11d48;
-            white-space: nowrap;
-            overflow: visible;
-            margin: 0.8rem 0;
-            line-height: 1.2;
-        ">
-            {title}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.header(f":red[{title}]")
     st.markdown("---")
 
     st.subheader("❄️ 特徴的な名詞ランキング 🖋️（Top 5）")
@@ -1016,8 +857,6 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
-    # ★ 名刺テーマ選択（ラッパーで包み込んでCSSで完全同期・横1行）
-    st.markdown('<div class="theme-radio-wrap">', unsafe_allow_html=True)
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
         options=[
@@ -1031,7 +870,6 @@ if "title" in st.session_state:
         index=0,
         horizontal=True,
     )
-    st.markdown("</div>", unsafe_allow_html=True)
 
     img_bytes = create_card_image(
         target_author, title, top_words, theme=selected_theme
