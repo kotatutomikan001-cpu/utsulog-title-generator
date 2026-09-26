@@ -546,7 +546,29 @@ def generate_nickname(comments):
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（PNG直接挿入対応版）
+# ★ 縁取り文字描画用ヘルパー関数
+# -------------------------------------------------------------
+def draw_text_with_outline(
+    draw,
+    position,
+    text,
+    font,
+    fill_color,
+    outline_color=(255, 255, 255),
+    outline_range=2,
+):
+    x, y = position
+    # 周囲に指定サイズの縁取りを描画
+    for dx in range(-outline_range, outline_range + 1):
+        for dy in range(-outline_range, outline_range + 1):
+            if dx != 0 or dy != 0:
+                draw.text((x + dx, y + dy), text, font=font, fill=outline_color)
+    # 本体の文字を描画
+    draw.text((x, y), text, font=font, fill=fill_color)
+
+
+# -------------------------------------------------------------
+# ★ テーマ別名刺画像生成関数（視認性向上・薄い称号枠版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -574,30 +596,26 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
             specific_bg_file = cand
             break
 
-    # 固定カラー定義（文字が綺麗に見えるホワイト・ゴールド系）
-    overlay_color = (
-        15,
-        23,
-        42,
-        140,
-    )  # 薄いネイビー透過（文字の視認性確保用）
-    border_outer = (51, 65, 85)
-    border_inner = (148, 163, 184)
-    title_box_bg = (30, 41, 59, 220)  # タイトル枠背景（半透明）
-    title_box_border = (148, 163, 184)
-    text_dark = (248, 250, 252)  # 文字色（白）
-    text_sub = (203, 213, 225)  # サブ文字色（薄グレー）
-    red_accent = (244, 63, 94)  # 称号テキスト色（ピンク・赤系）
+    # ★ 視認性を高めた配色（くっきり読める濃いカラー）
+    border_outer = (51, 65, 85, 200)
+    border_inner = (148, 163, 184, 200)
+
+    # 称号枠（かなり薄い半透明のホワイト枠に変更）
+    title_box_bg = (255, 255, 255, 190)  # 薄い白背景
+    title_box_border = (203, 213, 225, 220)  # 薄い枠線
+
+    text_dark = (15, 23, 42)  # 本文・タイトル文字（ダークネイビー）
+    text_sub = (71, 85, 105)  # サブテキスト色
+    red_accent = (225, 29, 72)  # 称号テキスト色（鮮やかなローズレッド）
 
     # 背景PNG画像の読み込み
     if specific_bg_file:
         img = Image.open(specific_bg_file).convert("RGBA")
         img = img.resize((width, height))
     else:
-        # 画像ファイルがない場合のデフォルト背景
-        img = Image.new("RGBA", (width, height), color=(30, 41, 59, 255))
+        img = Image.new("RGBA", (width, height), color=(240, 248, 255, 255))
 
-    # 文字枠・テキスト合成用の描画キャンバス
+    # 合成用オーバーレイ
     overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
 
@@ -623,29 +641,50 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
             font_rank_item
         ) = font_footer = ImageFont.load_default()
 
-    # ヘッダー・投稿者名
-    draw.text(
-        (50, 45), "うつログ称号ジェネレーター", fill=text_sub, font=font_header
+    # 1. ヘッダー
+    draw_text_with_outline(
+        draw,
+        (50, 45),
+        "うつログ称号ジェネレーター",
+        font_header,
+        text_sub,
+        outline_range=2,
     )
-    draw.text((50, 85), f"投稿者: {author_name}", fill=text_dark, font=font_author)
 
-    # 称号枠
+    # 2. 投稿者名
+    draw_text_with_outline(
+        draw,
+        (50, 85),
+        f"投稿者: {author_name}",
+        font_author,
+        text_dark,
+        outline_range=2,
+    )
+
+    # 3. 称号枠（薄い半透明白枠）
     draw.rectangle(
         [50, 145, width - 50, 235],
         fill=title_box_bg,
         outline=title_box_border,
         width=2,
     )
-    draw.text((70, 170), title, fill=red_accent, font=font_title)
 
-    # ランキング
-    draw.text(
-        (50, 265),
-        "◇ 特徴的な名詞ランキング",
-        fill=text_dark,
-        font=font_rank_head,
+    # 称号テキスト
+    draw_text_with_outline(
+        draw, (70, 170), title, font_title, red_accent, outline_range=2
     )
 
+    # 4. ランキング見出し
+    draw_text_with_outline(
+        draw,
+        (50, 265),
+        "◇ 特徴的な名詞ランキング",
+        font_rank_head,
+        text_dark,
+        outline_range=2,
+    )
+
+    # 5. ランキング項目
     y_pos = 310
     current_rank = 1
     for idx, (word, count) in enumerate(top_words[:3]):
@@ -655,23 +694,27 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
             current_rank = idx + 1
             rank_str = f"第 {current_rank} 位"
 
-        draw.text(
+        draw_text_with_outline(
+            draw,
             (70, y_pos),
             f"{rank_str}:   {word}   ({count} 回)",
-            fill=text_dark,
-            font=font_rank_item,
+            font_rank_item,
+            text_dark,
+            outline_range=2,
         )
         y_pos += 42
 
-    # フッター
-    draw.text(
+    # 6. フッター
+    draw_text_with_outline(
+        draw,
         (50, 490),
         "#うつログ称号ジェネレーター  |  氷室うつろ非公式ファンツール",
-        fill=text_sub,
-        font=font_footer,
+        font_footer,
+        text_sub,
+        outline_range=1,
     )
 
-    # 背景画像とテキストレイヤーを合成
+    # 画像レイヤーの合成
     final_img = Image.alpha_composite(img, overlay).convert("RGB")
 
     buf = io.BytesIO()
@@ -764,7 +807,6 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
-    # 新しい選択肢テーマ（おまさい ＋ 立ち絵①〜⑤）
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
         options=[
