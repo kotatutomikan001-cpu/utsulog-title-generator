@@ -15,7 +15,7 @@ import streamlit as st
 # 1. 画面デザイン・タイトルの設定
 # -------------------------------------------------------------
 st.set_page_config(
-    page_title="うつログ称号ジェネレーター",
+    page_title="うつログ（うつろ書架）の称号診断",
     page_icon="❄️",
     layout="centered",
 )
@@ -98,6 +98,18 @@ def set_bg_image():
         color: #f8fafc !important;
         font-size: 1.8rem !important;
         margin-bottom: 1rem !important;
+        line-height: 1.4 !important;
+    }}
+
+    /* ルビ（ふりがな）用スタイリング */
+    .header-box ruby {{
+        ruby-align: center;
+    }}
+    
+    .header-box rt {{
+        font-size: 0.55em !important;
+        color: #94a3b8 !important;
+        font-weight: normal !important;
     }}
 
     .header-box p {{
@@ -172,8 +184,8 @@ set_bg_image()
 st.markdown(
     """
     <div class="header-box">
-        <h1>❄️ うつログ称号ジェネレーター 🖋️</h1>
-        <p>@から始まる投稿者名を入力してボタンを押すと、過去に”Utsuro CH. 氷室うつろ”で自分が発言したコメントの傾向を解析して「称号」を自動生成します。<br>果たしてどんな称号になるのか・・・</p>
+        <h1>❄️ <ruby>うつろ書架<rt>うつログ</rt></ruby>の称号診断 🖋️</h1>
+        <p>@から始まる投稿者名を入力してボタンを押すと、うつログを介して過去に”Utsuro CH. 氷室うつろ”で自分が発言したコメントの傾向を解析して「称号」を自動生成します。<br>果たしてどんな称号になるのか・・・</p>
         <div class="notice-text">
             ※検索機能をお借りしているうつログのサーバー負荷軽減および処理時間短縮のため、解析件数を選択できるようにしています。（仕様上、過去コメントは最大3000件まで遡ることができます）<br>
             ※過去コメントのデータ取得処理はクラウドサーバー上で行われるため、スマホの通信量（ギガ）消費はごくわずか（1回あたり数MB程度）です。安心してご利用ください。
@@ -282,7 +294,7 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（「流石」「さすが」「すか」除外対応）
+# 3. 称号生成関数
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
@@ -330,8 +342,8 @@ def generate_nickname(comments):
     ]
 
     stop_words = {
-        "流石",  # ← 「流石」を除外
-        "さすが",  # ← 「さすが」を除外
+        "流石",
+        "さすが",
         "すか",
         "こと",
         "よう",
@@ -660,7 +672,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
     draw_text_with_outline(
         draw,
         (50, 45),
-        "うつログ称号ジェネレーター",
+        "うつログ（うつろ書架）の称号診断",
         font_header,
         text_sub,
         outline_color=outline_c,
@@ -724,7 +736,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
     draw_text_with_outline(
         draw,
         (50, 490),
-        "#うつログ称号ジェネレーター  |  氷室うつろ非公式ファンツール",
+        "#うつろ書架の称号診断  |  氷室うつろ非公式ファンツール",
         font_footer,
         text_sub,
         outline_color=outline_c,
@@ -871,10 +883,10 @@ if "title" in st.session_state:
         raw_tweet_text = (
             f"{target_author} の獲得称号は…\n\n"
             f"✨ {title} ✨\n\n"
-            f"👇 うつログ称号ジェネレーターはこちら！\n"
+            f"👇 うつろ書架の称号診断はこちら！\n"
             f"{app_url}\n\n"
             f"※保存した名刺画像を添えてポストしてね！\n"
-            f"#うつログ称号ジェネレーター #氷室うつろ"
+            f"#うつろ書架の称号診断 #うつログ #氷室うつろ"
         )
         encoded_text = urllib.parse.quote(raw_tweet_text)
         tweet_url = f"https://x.com/intent/post?text={encoded_text}"
