@@ -584,7 +584,7 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数
+# ★ テーマ別名刺画像生成関数（ルビ描画対応版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -658,6 +658,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
     font_path = get_japanese_font()
 
     if font_path:
+        font_ruby = ImageFont.truetype(font_path, 13)
         font_header = ImageFont.truetype(font_path, 22)
         font_author = ImageFont.truetype(font_path, 32)
         font_title = ImageFont.truetype(font_path, 30)
@@ -665,20 +666,45 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         font_rank_item = ImageFont.truetype(font_path, 22)
         font_footer = ImageFont.truetype(font_path, 18)
     else:
-        font_header = font_author = font_title = font_rank_head = (
+        font_ruby = font_header = font_author = font_title = font_rank_head = (
             font_rank_item
         ) = font_footer = ImageFont.load_default()
 
+    # 1. ヘッダー（「うつろ書架」の上にルビ「うつログ」を描画）
+    # 「❄️ 」の幅を計算して「うつろ書架」の開始位置を算出
+    prefix_str = "❄️ "
+    try:
+        bbox = font_header.getbbox(prefix_str)
+        prefix_w = bbox[2] - bbox[0]
+    except Exception:
+        prefix_w = 35
+
+    ruby_x = 50 + prefix_w + 5
+    ruby_y = 28
+
+    # ルビ「うつログ」
+    draw_text_with_outline(
+        draw,
+        (ruby_x, ruby_y),
+        "うつログ",
+        font_ruby,
+        text_sub,
+        outline_color=outline_c,
+        outline_range=outline_r,
+    )
+
+    # メインのタイトル文字列「❄️ うつろ書架の称号診断 🖋️」
     draw_text_with_outline(
         draw,
         (50, 45),
-        "うつログ（うつろ書架）の称号診断",
+        "❄️ うつろ書架の称号診断 🖋️",
         font_header,
         text_sub,
         outline_color=outline_c,
         outline_range=outline_r,
     )
 
+    # 2. 投稿者名
     draw_text_with_outline(
         draw,
         (50, 85),
@@ -689,6 +715,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         outline_range=outline_r,
     )
 
+    # 3. 称号枠
     draw.rectangle(
         [50, 145, width - 50, 235],
         fill=title_box_bg,
@@ -703,6 +730,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         draw, (70, 170), title, font_title, title_text_color, outline_range=0
     )
 
+    # 4. ランキング見出し
     draw_text_with_outline(
         draw,
         (50, 265),
@@ -713,6 +741,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         outline_range=outline_r,
     )
 
+    # 5. ランキング項目
     y_pos = 310
     current_rank = 1
     for idx, (word, count) in enumerate(top_words[:3]):
@@ -733,6 +762,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         )
         y_pos += 42
 
+    # 6. フッター
     draw_text_with_outline(
         draw,
         (50, 490),
@@ -880,7 +910,6 @@ if "title" in st.session_state:
         except Exception:
             pass
 
-        # 「うつろ書架（うつログ）の称号診断」に変更
         raw_tweet_text = (
             f"{target_author} の獲得称号は…\n\n"
             f"✨ {title} ✨\n\n"
