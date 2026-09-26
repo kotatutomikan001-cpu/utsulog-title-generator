@@ -893,7 +893,7 @@ if "title" in st.session_state:
         )
 
     with btn_col2:
-        # ★ 静的な OGP を持つ GitHub Pages の URL をシェア用に指定
+        # ★ 静的な OGP を保持した GitHub Pages の URL
         share_app_url = "https://kotatutomikan001-cpu.github.io/utsulog-title-generator/"
 
         raw_tweet_text = (
