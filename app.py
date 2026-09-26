@@ -393,6 +393,14 @@ def generate_nickname(comments):
         "―",
         "〜",
         "～",
+        "ーーー",
+        "ーー",
+        "---",
+        "--",
+        "───",
+        "──",
+        "━━━",
+        "━━",
     }
 
     allowed_subcategories = [
@@ -414,6 +422,8 @@ def generate_nickname(comments):
         "]+",
         flags=re.UNICODE,
     )
+
+    dash_pattern = re.compile(r"^[\─\―\‐\-\—\━\ー\─\=]+$")
 
     for comment in comments:
         working_comment = symbol_pattern.sub(" ", comment)
@@ -447,7 +457,7 @@ def generate_nickname(comments):
                         len(word) > 1
                         and word not in stop_words
                         and not symbol_pattern.search(word)
-                        and not re.match(r"^[\.\…\―\─\～\〜]+$", word)
+                        and not dash_pattern.match(word)
                     ):
                         words.append(word)
             elif pos_main in ["カスタム名詞", "未知語"]:
@@ -456,7 +466,7 @@ def generate_nickname(comments):
                     len(word) > 1
                     and word not in stop_words
                     and not symbol_pattern.search(word)
-                    and not re.match(r"^[\.\…\―\─\～\〜]+$", word)
+                    and not dash_pattern.match(word)
                 ):
                     words.append(word)
 
@@ -584,7 +594,7 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（「おまさい」称号背景透過版）
+# ★ テーマ別名刺画像生成関数（称号フォントサイズ自動調整対応版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -627,7 +637,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         border_outer = (51, 65, 85, 220)
         border_inner = (148, 163, 184, 220)
 
-        # 薄い水色のまま透過処理（アルファ値 230 → 140）
         title_box_bg = (224, 242, 254, 140)
         title_box_border = (186, 230, 253, 200)
 
@@ -665,12 +674,11 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         font_ruby = ImageFont.truetype(font_path, 13)
         font_header = ImageFont.truetype(font_path, 22)
         font_author = ImageFont.truetype(font_path, 32)
-        font_title = ImageFont.truetype(font_path, 30)
         font_rank_head = ImageFont.truetype(font_path, 24)
         font_rank_item = ImageFont.truetype(font_path, 22)
         font_footer = ImageFont.truetype(font_path, 18)
     else:
-        font_ruby = font_header = font_author = font_title = font_rank_head = (
+        font_ruby = font_header = font_author = font_rank_head = (
             font_rank_item
         ) = font_footer = ImageFont.load_default()
 
@@ -706,7 +714,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         outline_range=outline_r,
     )
 
-    # 3. 称号枠
+    # 3. 称号枠の描画
     draw.rectangle(
         [50, 145, width - 50, 235],
         fill=title_box_bg,
@@ -714,10 +722,41 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         width=2,
     )
 
-    # 全テーマ共通で赤系（red_accent）に統一
+    # ---------------------------------------------------------
+    # ★ 称号文字サイズの自動動的調整処理（はみ出し防止）
+    # ---------------------------------------------------------
+    max_title_width = (width - 50) - 70 - 20  # 許容最大横幅: 860px
+    target_font_size = 30  # 標準サイズ
+
+    if font_path:
+        while target_font_size >= 18:
+            test_font = ImageFont.truetype(font_path, target_font_size)
+            try:
+                bbox = test_font.getbbox(title)
+                text_w = bbox[2] - bbox[0]
+            except Exception:
+                text_w = target_font_size * len(title)
+
+            if text_w <= max_title_width:
+                font_title = test_font
+                break
+            target_font_size -= 1
+        else:
+            font_title = ImageFont.truetype(font_path, 18)
+    else:
+        font_title = ImageFont.load_default()
+
+    # 文字サイズに応じた上下中央位置のY座標計算
+    title_y = 170 + int((30 - target_font_size) * 0.45)
+
     title_text_color = red_accent
     draw_text_with_outline(
-        draw, (70, 170), title, font_title, title_text_color, outline_range=0
+        draw,
+        (70, title_y),
+        title,
+        font_title,
+        title_text_color,
+        outline_range=0,
     )
 
     # 4. ランキング見出し
