@@ -584,7 +584,7 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（ルビ描画対応版）
+# ★ テーマ別名刺画像生成関数（豆腐文字対策・絵文字非依存版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -670,22 +670,11 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
             font_rank_item
         ) = font_footer = ImageFont.load_default()
 
-    # 1. ヘッダー（「うつろ書架」の上にルビ「うつログ」を描画）
-    # 「❄️ 」の幅を計算して「うつろ書架」の開始位置を算出
-    prefix_str = "❄️ "
-    try:
-        bbox = font_header.getbbox(prefix_str)
-        prefix_w = bbox[2] - bbox[0]
-    except Exception:
-        prefix_w = 35
-
-    ruby_x = 50 + prefix_w + 5
-    ruby_y = 28
-
+    # 1. ヘッダー（絵文字なし・日本語フォント依存）
     # ルビ「うつログ」
     draw_text_with_outline(
         draw,
-        (ruby_x, ruby_y),
+        (50, 28),
         "うつログ",
         font_ruby,
         text_sub,
@@ -693,11 +682,11 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         outline_range=outline_r,
     )
 
-    # メインのタイトル文字列「❄️ うつろ書架の称号診断 🖋️」
+    # メインタイトル「うつろ書架の称号診断」
     draw_text_with_outline(
         draw,
         (50, 45),
-        "❄️ うつろ書架の称号診断 🖋️",
+        "うつろ書架の称号診断",
         font_header,
         text_sub,
         outline_color=outline_c,
