@@ -584,7 +584,7 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（ふり仮名位置調整版）
+# ★ テーマ別名刺画像生成関数（ルビ位置修正・背景調整版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -636,14 +636,18 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         outline_c = None
         outline_r = 0
     else:
+        # うつろテーマ群：イラストを背景としてくっきり魅せるため、カード全体に薄い白オーバーレイを配置
+        card_base_bg = Image.new("RGBA", (width, height), (255, 255, 255, 120))
+        img = Image.alpha_composite(img, card_base_bg)
+
         border_outer = (51, 65, 85, 200)
         border_inner = (148, 163, 184, 200)
 
-        title_box_bg = (255, 255, 255, 190)
+        title_box_bg = (255, 255, 255, 210)
         title_box_border = (203, 213, 225, 220)
 
         text_dark = (15, 23, 42)
-        text_sub = (71, 85, 105)
+        text_sub = (51, 65, 85)
         red_accent = (225, 29, 72)
         outline_c = (255, 255, 255)
         outline_r = 2
@@ -671,10 +675,10 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         ) = font_footer = ImageFont.load_default()
 
     # 1. ヘッダー
-    # ルビ「うつログ」を「うつろ書架」の真上になるよう右へずらして描画 (X=60)
+    # 「うつろ書架」全体（漢字の上中央付近）へ乗るようにX=85へ配置
     draw_text_with_outline(
         draw,
-        (60, 28),
+        (85, 28),
         "うつログ",
         font_ruby,
         text_sub,
