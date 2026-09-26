@@ -77,9 +77,9 @@ def set_bg_image():
         background-color: rgba(0,0,0,0) !important;
     }}
     
-    /* メインエリア幅（PC表示でも狭くならないよう元通り設定） */
+    /* メインエリア幅 */
     .main .block-container {{
-        max-width: 800px !important;
+        max-width: 760px !important;
         padding-top: 2rem !important;
     }}
 
@@ -130,12 +130,15 @@ def set_bg_image():
         margin-top: 0.8rem !important;
     }}
 
-    /* 下のフォーム枠（白背景固定・崩れ防止） */
+    /* 下のフォーム枠（白背景・幅を解析モード枠サイズで固定＆完全センタリング） */
     div[data-testid="stTextInput"], div[data-testid="stRadio"], div[data-testid="stButton"] {{
         background-color: rgba(255, 255, 255, 0.92) !important;
         padding: 1rem 1.25rem !important;
         border-radius: 12px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
         margin-bottom: 1rem !important;
+        max-width: 440px !important; /* 幅をすっきり統一 */
         width: 100% !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
     }}
@@ -149,7 +152,7 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
-    /* 解析モード（ラジオボタン）のレイアウト修正 */
+    /* 解析モード（ラジオボタン）枠内選択肢は左寄せ */
     div[data-testid="stRadio"] > label {{
         display: block !important;
         text-align: left !important;
@@ -191,7 +194,7 @@ def set_bg_image():
         display: inline-block !important;
     }}
 
-    /* WEB上の称号文字表示（途切れ防止・レスポンシブ縮小） */
+    /* WEB上の称号文字表示 */
     .web-title-display {{
         text-align: center !important;
         font-size: clamp(0.95rem, 3.2vw, 1.8rem) !important;
@@ -932,7 +935,7 @@ if "title" in st.session_state:
         unsafe_allow_html=True,
     )
 
-    # 2. 獲得称号テキスト表示（WEB画面上で長文称号が途切れず全文表示されるよう補正）
+    # 2. 獲得称号テキスト表示
     st.markdown(
         f"""
         <div class="web-title-display">
