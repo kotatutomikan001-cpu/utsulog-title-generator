@@ -10,6 +10,7 @@ from janome.tokenizer import Tokenizer
 from PIL import Image, ImageDraw, ImageFont
 from playwright.sync_api import sync_playwright
 import streamlit as st
+import streamlit_head as head
 
 # -------------------------------------------------------------
 # 1. 画面デザイン・タイトルの設定
@@ -18,6 +19,30 @@ st.set_page_config(
     page_title="うつログ（うつろ書架）の称号診断",
     page_icon="❄️",
     layout="centered",
+)
+
+# -------------------------------------------------------------
+# ★ OGP（SNSシェア時のカード画像・メタ情報）の設定
+# -------------------------------------------------------------
+ogp_image_url = "https://raw.githubusercontent.com/kotatutomikan001-cpu/utsulog-title-generator/main/ogp.png"
+app_base_url = "https://utsulog-title-generator-5vutqglq3okeo3worwzxhs.streamlit.app"
+
+head.head(
+    f"""
+    <!-- Open Graph / Facebook / LINE -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{app_base_url}">
+    <meta property="og:title" content="うつログ（うつろ書架）の称号診断">
+    <meta property="og:description" content="うつログの過去コメントからあなたの称号を診断！">
+    <meta property="og:image" content="{ogp_image_url}">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{app_base_url}">
+    <meta name="twitter:title" content="うつログ（うつろ書架）の称号診断">
+    <meta name="twitter:description" content="うつログの過去コメントからあなたの称号を診断！">
+    <meta name="twitter:image" content="{ogp_image_url}">
+    """
 )
 
 
@@ -902,8 +927,8 @@ if "title" in st.session_state:
         except Exception:
             pass
 
-        # URLの末尾に ?v=1 を付与してXのキャッシュを破棄させる
-        share_app_url = f"{app_url}?v=1"
+        # URLの末尾に ?v=2 を付与してXのキャッシュを破棄させる
+        share_app_url = f"{app_url}?v=2"
 
         raw_tweet_text = (
             f"{target_author} の獲得称号は…\n\n"
