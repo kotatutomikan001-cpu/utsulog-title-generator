@@ -130,13 +130,13 @@ def set_bg_image():
         margin-top: 0.8rem !important;
     }}
 
-    /* 下のフォーム枠（白背景固定・枠自体のセンタリング対応） */
+    /* 下のフォーム枠（白背景固定・枠自体のセンタリング配置） */
     div[data-testid="stTextInput"], div[data-testid="stRadio"], div[data-testid="stButton"] {{
         background-color: rgba(255, 255, 255, 0.92) !important;
-        padding: 1rem !important;
+        padding: 1rem 1.25rem !important;
         border-radius: 12px !important;
-        margin: 0 auto 1rem auto !important; /* 枠自体を中央に配置 */
-        max-width: 500px !important; /* 枠の最大幅を制限して収まりをよくする */
+        margin: 0 auto 1rem auto !important; /* 枠自体を画面中央に配置 */
+        max-width: 500px !important; /* 幅を揃える */
         box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
     }}
 
@@ -149,23 +149,23 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
-    /* 解析モード（ラジオボタン）枠と要素のセンタリング */
+    /* 解析モード（ラジオボタン）枠内は左寄せに指定 */
     div[data-testid="stRadio"] {{
-        text-align: center !important;
+        text-align: left !important;
     }}
     div[data-testid="stRadio"] > label {{
         display: block !important;
-        text-align: center !important;
+        text-align: left !important;
         width: 100% !important;
     }}
     div[data-testid="stRadio"] div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
     }}
 
-    /* テキスト入力枠と内部のセンタリング */
+    /* テキスト入力枠 */
     div[data-testid="stTextInput"] label {{
         display: block !important;
         text-align: center !important;
