@@ -128,8 +128,21 @@ def set_bg_image():
         margin-top: 0.8rem !important;
     }}
 
-    /* 下のフォーム枠（白背景固定） */
-    div[data-testid="stTextInput"], div[data-testid="stRadio"], div[data-testid="stButton"] {{
+    /* 投稿者名入力枠・ボタン枠（白背景・コンパクト幅固定＆中央寄せ） */
+    div[data-testid="stTextInput"], div[data-testid="stButton"] {{
+        background-color: rgba(255, 255, 255, 0.92) !important;
+        padding: 1rem !important;
+        border-radius: 12px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        margin-bottom: 1rem !important;
+        max-width: 360px !important; /* 入力枠を短くスマートに */
+        width: 100% !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    }}
+
+    /* 解析モード枠（白背景固定） */
+    div[data-testid="stRadio"] {{
         background-color: rgba(255, 255, 255, 0.92) !important;
         padding: 1rem !important;
         border-radius: 12px !important;
@@ -153,6 +166,15 @@ def set_bg_image():
 
     div[data-testid="stTextInput"] input::placeholder {{
         color: #64748b !important;
+    }}
+
+    /* 解析完了（成功メッセージ）の緑枠もコンパクトに縮小＆中央寄せ */
+    div[data-testid="stAlert"] {{
+        max-width: 360px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        margin-bottom: 1rem !important;
+        border-radius: 10px !important;
     }}
     
     /* Xシェア用カスタムリンクボタン */
@@ -520,7 +542,7 @@ def generate_nickname(comments):
             f"【{top1}の空に想いを馳せ{top2}の章を詠む英雄】",
             f"【{top1}の書庫に深く潜り{top2}の真理を極めし執筆者】",
             f"【{top1}の書巻を広げ{top2}の領域を統べる主】",
-            f"【{top1}を凍てつく筆下に込め{top2}を描く者】",
+            f"【{top1}を凍てつく筆先に込め{top2}を描く者】",
             f"【{top1}の図書室で静かに{top2}の解を導く英雄】",
             f"【{top1}を原稿用紙に走らせ{top2}を解き明かす覇王】",
             f"【{top1}を万年筆に宿し{top2}の歴史を紡ぐ主】",
