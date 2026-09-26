@@ -130,12 +130,13 @@ def set_bg_image():
         margin-top: 0.8rem !important;
     }}
 
-    /* 下のフォーム枠（白背景固定） */
+    /* 下のフォーム枠（白背景固定・枠自体のセンタリング対応） */
     div[data-testid="stTextInput"], div[data-testid="stRadio"], div[data-testid="stButton"] {{
         background-color: rgba(255, 255, 255, 0.92) !important;
         padding: 1rem !important;
         border-radius: 12px !important;
-        margin-bottom: 1rem !important;
+        margin: 0 auto 1rem auto !important; /* 枠自体を中央に配置 */
+        max-width: 500px !important; /* 枠の最大幅を制限して収まりをよくする */
         box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
     }}
 
@@ -148,7 +149,7 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
-    /* 解析モード（ラジオボタン）要素のセンタリング */
+    /* 解析モード（ラジオボタン）枠と要素のセンタリング */
     div[data-testid="stRadio"] {{
         text-align: center !important;
     }}
@@ -164,7 +165,7 @@ def set_bg_image():
         justify-content: center !important;
     }}
 
-    /* テキスト入力の中央揃え */
+    /* テキスト入力枠と内部のセンタリング */
     div[data-testid="stTextInput"] label {{
         display: block !important;
         text-align: center !important;
@@ -865,13 +866,9 @@ mode = st.radio(
     index=0,
 )
 
-# ボタンを中央に配置するために3つのカラムを作成
-btn_col_l, btn_col_m, btn_col_r = st.columns([1, 2, 1])
-
-with btn_col_m:
-    generate_btn = st.button(
-        "称号を獲得する！", type="primary", use_container_width=True
-    )
+generate_btn = st.button(
+    "称号を獲得する！", type="primary", use_container_width=True
+)
 
 if generate_btn:
     raw_author = input_name.strip()
