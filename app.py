@@ -138,7 +138,7 @@ def set_bg_image():
         width: 100% !important;
     }}
 
-    /* ★ 入力枠・解析モード・ボタンの幅と位置を440pxで完全一致 */
+    /* ★ 入力枠・解析モード・ボタンの幅を440pxで統一 */
     div[data-testid="stTextInput"], 
     div[data-testid="stRadio"], 
     div[data-testid="stButton"] {{
@@ -163,7 +163,7 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
-    /* ★ 解析モード選択肢・デザインテーマ選択肢を横一列に配置 */
+    /* 解析モード選択肢のレイアウト */
     div[data-testid="stRadio"] div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: row !important;
@@ -171,6 +171,15 @@ def set_bg_image():
         justify-content: space-around !important;
         align-items: center !important;
         gap: 0.5rem !important;
+    }}
+
+    /* ★ 名刺テーマ選択（後半のstRadio）は横幅をしっかり確保して1行固定にする */
+    .theme-select-box div[data-testid="stRadio"] {{
+        max-width: 680px !important;
+    }}
+    .theme-select-box div[role="radiogroup"] {{
+        flex-wrap: nowrap !important;
+        justify-content: space-between !important;
     }}
 
     div[data-testid="stTextInput"] input {{
@@ -963,6 +972,8 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
+    # ★ テーマ選択のみ横幅制限を広げて横一列に綺麗に収める
+    st.markdown('<div class="theme-select-box">', unsafe_allow_html=True)
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
         options=[
@@ -976,6 +987,7 @@ if "title" in st.session_state:
         index=0,
         horizontal=True,
     )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     img_bytes = create_card_image(
         target_author, title, top_words, theme=selected_theme
