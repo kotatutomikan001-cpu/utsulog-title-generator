@@ -138,7 +138,7 @@ def set_bg_image():
         width: 100% !important;
     }}
 
-    /* ★ 入力枠・解析モード・ボタンの基本デザイン（幅440px） */
+    /* ★ 入力枠・上部解析モード・ボタンの基本デザイン（幅440px） */
     div[data-testid="stTextInput"], 
     div[data-testid="stRadio"], 
     div[data-testid="stButton"] {{
@@ -163,7 +163,7 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
-    /* ★ 上部解析モード選択肢は「左寄せ（非センタリング）」で配置 */
+    /* 上部解析モード選択肢：左寄せ */
     .analysis-mode-box div[data-testid="stRadio"] div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: column !important;
@@ -172,17 +172,30 @@ def set_bg_image():
         gap: 0.5rem !important;
     }}
 
-    /* ★ 名刺テーマ選択肢は「横幅を広く確保して絶対1行」にする */
-    .theme-select-box div[data-testid="stRadio"] {{
-        max-width: 680px !important;
+    /* ★★★ 名刺テーマ選択枠の特例解放（横幅720pxに伸ばして絶対横1行） ★★★ */
+    div.element-container:has(.theme-select-box) {{
+        max-width: 720px !important;
+        width: 100% !important;
     }}
+
+    .theme-select-box div[data-testid="stRadio"] {{
+        max-width: 720px !important;
+        width: 100% !important;
+    }}
+
     .theme-select-box div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: nowrap !important;
+        flex-wrap: nowrap !important; /* 絶対に折り返さない */
         justify-content: space-between !important;
         align-items: center !important;
         gap: 0.2rem !important;
+        width: 100% !important;
+    }}
+
+    .theme-select-box div[role="radiogroup"] label {{
+        white-space: nowrap !important; /* 文字の折り返しも防ぐ */
+        margin-right: 0 !important;
     }}
 
     div[data-testid="stTextInput"] input {{
@@ -591,7 +604,7 @@ def generate_nickname(comments):
             f"【{top1}の空に想いを馳せ{top2}の章を詠む英雄】",
             f"【{top1}の書庫に深く潜り{top2}の真理を極めし執筆者】",
             f"【{top1}の書巻を広げ{top2}の領域を統べる主】",
-            f"【{top1}を凍てつく筆下に込め{top2}を描く者】",
+            f"【{top1}を凍てつく筆先に込め{top2}を描く者】",
             f"【{top1}の図書室で静かに{top2}の解を導く英雄】",
             f"【{top1}を原稿用紙に走らせ{top2}を解き明かす覇王】",
             f"【{top1}を万年筆に宿し{top2}の歴史を紡ぐ主】",
@@ -976,7 +989,7 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
-    # ★ テーマ選択のみ横幅制限を680pxまで広げて横1行に綺麗に収める
+    # ★ テーマ選択のみ幅720pxに完全拡大（絶対1行固定）
     st.markdown('<div class="theme-select-box">', unsafe_allow_html=True)
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
