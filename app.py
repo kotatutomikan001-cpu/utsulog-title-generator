@@ -80,7 +80,7 @@ def set_bg_image():
     
     /* メインエリア幅 */
     .main .block-container {{
-        max-width: 800px !important;
+        max-width: 760px !important;
         padding-top: 2rem !important;
     }}
 
@@ -131,96 +131,61 @@ def set_bg_image():
         margin-top: 0.8rem !important;
     }}
 
-    /* Streamlitコンテナブロック自体のセンタリング制御 */
-    div.element-container:has(div[data-testid="stTextInput"]),
-    div.element-container:has(div[data-testid="stRadio"]),
-    div.element-container:has(div[data-testid="stButton"]) {{
+    /* 入力フォーム群の親要素センタリング */
+    div.element-container:has(div.input-card-box) {{
         display: flex !important;
         justify-content: center !important;
         width: 100% !important;
     }}
 
-    /* フォーム白枠（説明文が1行に収まる幅520pxに最適化＆完全センタリング） */
-    div[data-testid="stTextInput"], 
-    div[data-testid="stRadio"], 
-    div[data-testid="stButton"] {{
+    /* 入力枠・解析モード・称号獲得ボタン専用の白カード枠（幅440pxでジャスト統一） */
+    .input-card-box {{
         background-color: rgba(255, 255, 255, 0.95) !important;
         padding: 1rem 1.25rem !important;
         border-radius: 12px !important;
         margin-left: auto !important;
         margin-right: auto !important;
         margin-bottom: 1rem !important;
-        max-width: 520px !important; /* 説明文が2行にならないゆとりのある幅 */
+        max-width: 440px !important;
         width: 100% !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
     }}
 
-    /* フォーム枠内文字色 */
-    div[data-testid="stTextInput"] label, 
-    div[data-testid="stRadio"] label, 
-    div[data-testid="stRadio"] p,
-    div[role="radiogroup"] label span {{
+    .input-card-box label, .input-card-box p, .input-card-box span {{
         color: #0f172a !important;
         font-weight: 600 !important;
-        white-space: nowrap !important; /* ラベルの不自然な折れを防止 */
     }}
 
-    /* 解析モード（ラジオボタン）枠内選択肢は左寄せ */
-    div[data-testid="stRadio"] > label {{
-        display: block !important;
-        text-align: left !important;
-        width: 100% !important;
-    }}
-    div[data-testid="stRadio"] div[role="radiogroup"] {{
+    /* 解析モード選択肢は左寄せ */
+    .input-card-box div[data-testid="stRadio"] div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: column !important;
         align-items: flex-start !important;
     }}
 
-    /* テキスト入力枠 */
-    div[data-testid="stTextInput"] label {{
-        display: block !important;
-        text-align: center !important;
-        width: 100% !important;
-    }}
-    div[data-testid="stTextInput"] input {{
+    /* テキスト入力枠内部 */
+    .input-card-box input {{
         color: #0f172a !important;
         background-color: #ffffff !important;
         text-align: center !important;
         border: 1px solid #cbd5e1 !important;
     }}
 
-    div[data-testid="stTextInput"] input::placeholder {{
-        color: #64748b !important;
-    }}
-    
     /* 称号獲得ボタンのスタイル */
-    div[data-testid="stButton"] button {{
+    .input-card-box button {{
         background-color: #e11d48 !important;
         color: #ffffff !important;
         border: none !important;
         font-weight: bold !important;
         padding: 0.6rem 1rem !important;
         border-radius: 8px !important;
+        width: 100% !important;
     }}
-    div[data-testid="stButton"] button:hover {{
+    .input-card-box button:hover {{
         background-color: #be123c !important;
     }}
 
-    /* 成功・完了メッセージ枠 */
-    div[data-testid="stAlert"] {{
-        background-color: rgba(240, 253, 244, 0.95) !important;
-        color: #166534 !important;
-        border: 1px solid #bbf7d0 !important;
-        border-radius: 10px !important;
-        max-width: 520px !important;
-        margin: 0 auto 1rem auto !important;
-    }}
-    div[data-testid="stAlert"] p {{
-        color: #166534 !important;
-    }}
-
-    /* ★ 結果表示エリア用パネル（文字が背景画像に溶け込まないための白い可読性カード） */
+    /* ★ 結果表示エリア（画面幅いっぱいのゆったり白い可読性カード） */
     .result-card-panel {{
         background-color: rgba(255, 255, 255, 0.95) !important;
         border-radius: 16px !important;
@@ -228,13 +193,30 @@ def set_bg_image():
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
         margin-top: 1.5rem !important;
         margin-bottom: 2rem !important;
+        width: 100% !important;
         color: #0f172a !important;
     }}
 
-    .result-card-panel h3, 
-    .result-card-panel p, 
-    .result-card-panel div {{
-        color: #0f172a !important;
+    /* ★ 名刺選択ラジオボタンを最初のように横並び1行で綺麗に表示 */
+    .result-card-panel div[data-testid="stRadio"] div[role="radiogroup"] {{
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: 1rem !important;
+    }}
+
+    /* WEB上の称号文字表示（途切れず1行で全文迫力表示） */
+    .web-title-display {{
+        text-align: center !important;
+        font-size: clamp(1.0rem, 2.8vw, 1.7rem) !important;
+        font-weight: bold !important;
+        color: #e11d48 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        padding: 0.6rem 0 !important;
+        line-height: 1.4 !important;
+        width: 100% !important;
     }}
 
     /* 見出し類の不自然な改行を防ぐスタイル設定 */
@@ -249,20 +231,6 @@ def set_bg_image():
 
     .custom-section-header span {{
         display: inline-block !important;
-    }}
-
-    /* WEB上の称号文字表示（ワイド幅＆1行迫力表示） */
-    .web-title-display {{
-        text-align: center !important;
-        font-size: clamp(1.1rem, 2.5vw, 1.8rem) !important;
-        font-weight: bold !important;
-        color: #e11d48 !important;
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        padding: 0.8rem 0 !important;
-        line-height: 1.4 !important;
-        width: 100% !important;
     }}
 
     /* Xシェア用カスタムリンクボタン */
@@ -924,19 +892,27 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
 # -------------------------------------------------------------
 # 4. 画面上の操作UI部分
 # -------------------------------------------------------------
+
+# 各UIエレメントを白カード枠HTMLで囲んで表示する関数
+st.markdown('<div class="input-card-box">', unsafe_allow_html=True)
 input_name = st.text_input(
     "投稿者名を入力してください（@以降のユーザー名）",
     value="",
     placeholder="@ユーザー名を入力",
 )
+st.markdown("</div>", unsafe_allow_html=True)
 
+st.markdown('<div class="input-card-box">', unsafe_allow_html=True)
 mode = st.radio(
     "解析モードを選択してください",
     options=["⚡ 爆速モード（直近〜500件程度）", "🐢 じっくり解析モード（直近〜3000件程度）"],
     index=0,
 )
+st.markdown("</div>", unsafe_allow_html=True)
 
+st.markdown('<div class="input-card-box">', unsafe_allow_html=True)
 generate_btn = st.button("称号を獲得する！", type="primary")
+st.markdown("</div>", unsafe_allow_html=True)
 
 if generate_btn:
     raw_author = input_name.strip()
@@ -993,7 +969,7 @@ if "title" in st.session_state:
         unsafe_allow_html=True,
     )
 
-    # 2. 獲得称号テキスト表示（途切れず横いっぱいに1行表示）
+    # 2. 獲得称号テキスト表示（途切れず全文表示）
     st.markdown(
         f"""
         <div class="web-title-display">
@@ -1023,7 +999,7 @@ if "title" in st.session_state:
             rank_label = f"第 {current_rank} 位"
 
         st.markdown(
-            f'<div style="color: #0f172a !important; font-weight: bold; margin-bottom: 0.3rem;">'
+            f'<div style="color: #0f172a !important; font-weight: bold; margin-bottom: 0.3rem; text-align: center;">'
             f'{rank_label}: <code style="color: #0369a1 !important; background: #e0f2fe !important; padding: 0.2rem 0.4rem; border-radius: 4px;">{word}</code> '
             f'（{count} 回出現）</div>',
             unsafe_allow_html=True,
@@ -1032,7 +1008,7 @@ if "title" in st.session_state:
     st.markdown("---")
 
     st.markdown(
-        '<h3 style="color: #0f172a !important; font-weight: bold; font-size: 1.25rem; margin-top: 1rem;">🎴 獲得称号名刺</h3>',
+        '<h3 style="color: #0f172a !important; font-weight: bold; font-size: 1.25rem; margin-top: 1rem; text-align: center;">🎴 獲得称号名刺</h3>',
         unsafe_allow_html=True,
     )
 
