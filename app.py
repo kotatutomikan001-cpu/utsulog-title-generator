@@ -558,17 +558,18 @@ def draw_text_with_outline(
     outline_range=2,
 ):
     x, y = position
-    # 周囲に指定サイズの縁取りを描画
-    for dx in range(-outline_range, outline_range + 1):
-        for dy in range(-outline_range, outline_range + 1):
-            if dx != 0 or dy != 0:
-                draw.text((x + dx, y + dy), text, font=font, fill=outline_color)
-    # 本体の文字を描画
+    if outline_range > 0 and outline_color:
+        for dx in range(-outline_range, outline_range + 1):
+            for dy in range(-outline_range, outline_range + 1):
+                if dx != 0 or dy != 0:
+                    draw.text(
+                        (x + dx, y + dy), text, font=font, fill=outline_color
+                    )
     draw.text((x, y), text, font=font, fill=fill_color)
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（視認性向上・薄い称号枠版）
+# ★ テーマ別名刺画像生成関数（おまさい初期配色復元版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -596,17 +597,32 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
             specific_bg_file = cand
             break
 
-    # ★ 視認性を高めた配色（くっきり読める濃いカラー）
-    border_outer = (51, 65, 85, 200)
-    border_inner = (148, 163, 184, 200)
+    # 2. テーマごとの配色切り替え（「おまさい」は初期のダークネイビー背景配色）
+    if theme == "おまさい":
+        border_outer = (51, 65, 85, 255)
+        border_inner = (148, 163, 184, 255)
 
-    # 称号枠（かなり薄い半透明のホワイト枠に変更）
-    title_box_bg = (255, 255, 255, 190)  # 薄い白背景
-    title_box_border = (203, 213, 225, 220)  # 薄い枠線
+        title_box_bg = (30, 41, 59, 220)  # ダークネイビー枠
+        title_box_border = (51, 65, 85, 255)
 
-    text_dark = (15, 23, 42)  # 本文・タイトル文字（ダークネイビー）
-    text_sub = (71, 85, 105)  # サブテキスト色
-    red_accent = (225, 29, 72)  # 称号テキスト色（鮮やかなローズレッド）
+        text_dark = (248, 250, 252)  # くっきり見える白文字
+        text_sub = (148, 163, 184)  # グレー系サブ文字
+        red_accent = (244, 63, 94)  # 称号ピンク・レッド
+        outline_c = (15, 23, 42)  # 暗い縁取り
+        outline_r = 2
+    else:
+        # 立ち絵①〜⑤用の設定（明るい背景イラストに対応）
+        border_outer = (51, 65, 85, 200)
+        border_inner = (148, 163, 184, 200)
+
+        title_box_bg = (255, 255, 255, 190)  # 薄い半透明白枠
+        title_box_border = (203, 213, 225, 220)
+
+        text_dark = (15, 23, 42)  # ダークネイビー本文
+        text_sub = (71, 85, 105)  # サブテキスト
+        red_accent = (225, 29, 72)  # 称号ローズレッド
+        outline_c = (255, 255, 255)  # 白縁取り
+        outline_r = 2
 
     # 背景PNG画像の読み込み
     if specific_bg_file:
@@ -648,7 +664,8 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         "うつログ称号ジェネレーター",
         font_header,
         text_sub,
-        outline_range=2,
+        outline_color=outline_c,
+        outline_range=outline_r,
     )
 
     # 2. 投稿者名
@@ -658,10 +675,11 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         f"投稿者: {author_name}",
         font_author,
         text_dark,
-        outline_range=2,
+        outline_color=outline_c,
+        outline_range=outline_r,
     )
 
-    # 3. 称号枠（薄い半透明白枠）
+    # 3. 称号枠
     draw.rectangle(
         [50, 145, width - 50, 235],
         fill=title_box_bg,
@@ -671,7 +689,13 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
 
     # 称号テキスト
     draw_text_with_outline(
-        draw, (70, 170), title, font_title, red_accent, outline_range=2
+        draw,
+        (70, 170),
+        title,
+        font_title,
+        red_accent,
+        outline_color=outline_c,
+        outline_range=outline_r,
     )
 
     # 4. ランキング見出し
@@ -681,7 +705,8 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         "◇ 特徴的な名詞ランキング",
         font_rank_head,
         text_dark,
-        outline_range=2,
+        outline_color=outline_c,
+        outline_range=outline_r,
     )
 
     # 5. ランキング項目
@@ -700,7 +725,8 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
             f"{rank_str}:   {word}   ({count} 回)",
             font_rank_item,
             text_dark,
-            outline_range=2,
+            outline_color=outline_c,
+            outline_range=outline_r,
         )
         y_pos += 42
 
@@ -711,6 +737,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         "#うつログ称号ジェネレーター  |  氷室うつろ非公式ファンツール",
         font_footer,
         text_sub,
+        outline_color=outline_c,
         outline_range=1,
     )
 
