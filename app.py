@@ -4,12 +4,18 @@ import io
 import os
 import re
 import shutil
+import threading
 import time
 import urllib.parse
 from janome.tokenizer import Tokenizer
 from PIL import Image, ImageDraw, ImageFont
 from playwright.sync_api import sync_playwright
 import streamlit as st
+
+# -------------------------------------------------------------
+# 同時アクセス対策：Playwright（ブラウザ）の同時起動数を「1台」に制限
+# -------------------------------------------------------------
+browser_semaphore = threading.Semaphore(1)
 
 # -------------------------------------------------------------
 # 1. 画面デザイン・タイトルの設定
@@ -198,12 +204,18 @@ st.markdown(
 
 
 # -------------------------------------------------------------
-# 2. コメント取得関数（キャッシュ＆負荷保護・エラーハンドリング強化版）
+# 2. コメント取得関数（キャッシュ＆同時起動制限・エラーハンドリング強化版）
 # -------------------------------------------------------------
 @st.cache_data(ttl=600, show_spinner=False)
 def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
     url = "https://utsulog.in"
     comments = []
+
+    # 同時アクセス制御：最大10秒間、前の人のブラウザ処理が終わるのを待つ
+    acquired = browser_semaphore.acquire(timeout=10)
+    if not acquired:
+        print("アクセス殺到のためブラウザ起動をスキップしました")
+        return []
 
     try:
         with sync_playwright() as p:
@@ -283,6 +295,9 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
     except Exception as e:
         print(f"fetch_comments_web error: {e}")
         return []
+    finally:
+        # 処理終了後、必ず次のリクエストのためにロックを解除する
+        browser_semaphore.release()
 
     return comments
 
@@ -815,7 +830,7 @@ if generate_btn:
             st.session_state["top_words"] = top_words
         else:
             st.error(
-                "コメントが取得できませんでした。投稿者名を確認するか、混雑している場合は少し時間をおいて再度お試しください。"
+                "コメントが取得できませんでした。現在アクセスが集中しているか、投稿者名が間違っている可能性があります。少し時間をおいて再度お試しください。"
             )
     else:
         st.warning("投稿者名を入力してね！")
