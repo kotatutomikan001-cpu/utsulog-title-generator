@@ -183,30 +183,18 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
-    /* ★★★ st.container(border=True) の白枠・背景色・レイアウト強制適用 ★★★ */
-    [data-testid="stVerticalBlockBorderWrapper"] {{
-        background-color: #ffffff !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 16px !important;
-        padding: 1rem 1.25rem !important;
-        margin: 1rem auto 1.5rem auto !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
-        max-width: 720px !important;
-        width: 100% !important;
-    }}
-
-    [data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stRadio"] {{
-        background-color: transparent !important;
+    /* ★★★ デザインテーマ用ラジオボタン内部の強制横1行スタイル ★★★ */
+    .direct-white-card div[data-testid="stRadio"] {{
+        background: transparent !important;
         padding: 0 !important;
         box-shadow: none !important;
-        max-width: 100% !important;
         width: 100% !important;
     }}
 
-    [data-testid="stVerticalBlockBorderWrapper"] div[role="radiogroup"] {{
+    .direct-white-card div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: nowrap !important; /* 横1行で折り返さない */
+        flex-wrap: nowrap !important;
         justify-content: space-between !important;
         align-items: center !important;
         gap: 0.5rem !important;
@@ -214,7 +202,7 @@ def set_bg_image():
         overflow-x: auto !important;
     }}
 
-    [data-testid="stVerticalBlockBorderWrapper"] div[role="radiogroup"] label {{
+    .direct-white-card div[role="radiogroup"] label {{
         white-space: nowrap !important;
         flex-shrink: 0 !important;
     }}
@@ -1010,21 +998,39 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
-    # ★ 強制白背景コンテナでデザインテーマを包む
-    with st.container(border=True):
-        selected_theme = st.radio(
-            "名刺カードのデザインテーマを選択してください",
-            options=[
-                "おまさい",
-                "うつろ①",
-                "うつろ②",
-                "うつろ③",
-                "うつろ④",
-                "うつろ⑤",
-            ],
-            index=0,
-            horizontal=True,
-        )
+    # ★ 確実に不透明な白背景・角丸・影が適用されるインラインスタイル枠でラジオボタンを包む
+    st.markdown(
+        """
+        <div class="direct-white-card" style="
+            background-color: rgba(255, 255, 255, 0.96) !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 12px !important;
+            padding: 1rem 1.25rem !important;
+            margin: 1rem auto 1.5rem auto !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+            max-width: 700px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        ">
+    """,
+        unsafe_allow_html=True,
+    )
+
+    selected_theme = st.radio(
+        "名刺カードのデザインテーマを選択してください",
+        options=[
+            "おまさい",
+            "うつろ①",
+            "うつろ②",
+            "うつろ③",
+            "うつろ④",
+            "うつろ⑤",
+        ],
+        index=0,
+        horizontal=True,
+    )
+
+    st.markdown("</div>", unsafe_allow_html=True)
 
     img_bytes = create_card_image(
         target_author, title, top_words, theme=selected_theme
