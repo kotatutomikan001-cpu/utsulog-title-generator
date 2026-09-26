@@ -584,7 +584,7 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（称号枠背景色統一版）
+# ★ テーマ別名刺画像生成関数（「おまさい」称号枠薄い水色版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -627,6 +627,10 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         border_outer = (51, 65, 85, 220)
         border_inner = (148, 163, 184, 220)
 
+        # 「おまさい」テーマ用：薄い水色（パステルブルー）の称号背景
+        title_box_bg = (224, 242, 254, 230)
+        title_box_border = (186, 230, 253, 255)
+
         text_dark = (15, 23, 42)
         text_sub = (71, 85, 105)
         red_accent = (244, 63, 94)
@@ -639,15 +643,15 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         border_outer = (51, 65, 85, 200)
         border_inner = (148, 163, 184, 200)
 
+        # 「うつろ」テーマ群用：半透明の白背景
+        title_box_bg = (255, 255, 255, 210)
+        title_box_border = (203, 213, 225, 220)
+
         text_dark = (15, 23, 42)
         text_sub = (51, 65, 85)
         red_accent = (225, 29, 72)
         outline_c = (255, 255, 255)
         outline_r = 2
-
-    # 称号枠の背景色・枠線を全テーマで統一（半透明白・ライトグレー枠線）
-    title_box_bg = (255, 255, 255, 210)
-    title_box_border = (203, 213, 225, 220)
 
     draw.rectangle(
         [20, 20, width - 20, height - 20], outline=border_outer, width=3
