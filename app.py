@@ -569,26 +569,26 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（おまさい自然なコントラスト調整版）
+# ★ テーマ別名刺画像生成関数（うつろ①〜⑤表記対応版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
 
-    # 1. テーマに応じたファイル名の検索
+    # 1. テーマに応じたファイル名の検索（「うつろ①〜⑤」対応）
     specific_bg_file = None
 
     if theme == "おまさい":
         candidates = ["bg_omasai.png", "bg_0.png", "bg.png", "bg.jpg"]
-    elif theme == "立ち絵①":
-        candidates = ["bg_1.png", "bg_1.jpg"]
-    elif theme == "立ち絵②":
-        candidates = ["bg_2.png", "bg_2.jpg"]
-    elif theme == "立ち絵③":
-        candidates = ["bg_3.png", "bg_3.jpg"]
-    elif theme == "立ち絵④":
-        candidates = ["bg_4.png", "bg_4.jpg"]
-    elif theme == "立ち絵⑤":
-        candidates = ["bg_5.png", "bg_5.jpg"]
+    elif theme == "うつろ①":
+        candidates = ["bg_utsuro1.png", "bg_1.png", "bg_1.jpg"]
+    elif theme == "うつろ②":
+        candidates = ["bg_utsuro2.png", "bg_2.png", "bg_2.jpg"]
+    elif theme == "うつろ③":
+        candidates = ["bg_utsuro3.png", "bg_3.png", "bg_3.jpg"]
+    elif theme == "うつろ④":
+        candidates = ["bg_utsuro4.png", "bg_4.png", "bg_4.jpg"]
+    elif theme == "うつろ⑤":
+        candidates = ["bg_utsuro5.png", "bg_5.png", "bg_5.jpg"]
     else:
         candidates = ["bg.png", "bg.jpg"]
 
@@ -610,7 +610,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
 
     # 2. 配色設定（「おまさい」は明るい背景になじむ薄い白ベタ敷き＋ネイビー文字）
     if theme == "おまさい":
-        # カード全体の視認性を上げるふんわり白い半透明下地
         card_base_bg = Image.new("RGBA", (width, height), (255, 255, 255, 160))
         img = Image.alpha_composite(img, card_base_bg)
 
@@ -620,13 +619,13 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         title_box_bg = (30, 41, 59, 230)  # 称号枠だけネイビー
         title_box_border = (51, 65, 85, 255)
 
-        text_dark = (15, 23, 42)  # くっきり見やすい濃いネイビー
-        text_sub = (71, 85, 105)  # サブテキスト
-        red_accent = (244, 63, 94)  # 称号ピンク・レッド
-        outline_c = None  # きつい黒縁取りは廃止
+        text_dark = (15, 23, 42)
+        text_sub = (71, 85, 105)
+        red_accent = (244, 63, 94)
+        outline_c = None
         outline_r = 0
     else:
-        # 立ち絵①〜⑤用の設定
+        # うつろ①〜⑤用の設定
         border_outer = (51, 65, 85, 200)
         border_inner = (148, 163, 184, 200)
 
@@ -691,7 +690,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         width=2,
     )
 
-    # 称号テキスト（おまさい時は白系文字でくっきり表示）
+    # 称号テキスト
     title_text_color = (
         (255, 255, 255) if theme == "おまさい" else red_accent
     )
@@ -835,15 +834,16 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
+    # テーマ選択肢を「うつろ①〜⑤」へ更新
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
         options=[
             "おまさい",
-            "立ち絵①",
-            "立ち絵②",
-            "立ち絵③",
-            "立ち絵④",
-            "立ち絵⑤",
+            "うつろ①",
+            "うつろ②",
+            "うつろ③",
+            "うつろ④",
+            "うつろ⑤",
         ],
         index=0,
         horizontal=True,
