@@ -902,11 +902,14 @@ if "title" in st.session_state:
         except Exception:
             pass
 
+        # URLの末尾に ?v=1 を付与してXのキャッシュを破棄させる
+        share_app_url = f"{app_url}?v=1"
+
         raw_tweet_text = (
             f"{target_author} の獲得称号は…\n\n"
             f"✨ {title} ✨\n\n"
             f"👇 うつろ書架（うつログ）の称号診断はこちら！\n"
-            f"{app_url}\n\n"
+            f"{share_app_url}\n\n"
             f"※保存した名刺画像を添えてポストしてね！\n"
             f"#うつろ書架の称号診断 #うつログ #氷室うつろ"
         )
