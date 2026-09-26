@@ -554,8 +554,8 @@ def draw_text_with_outline(
     text,
     font,
     fill_color,
-    outline_color=(255, 255, 255),
-    outline_range=2,
+    outline_color=None,
+    outline_range=0,
 ):
     x, y = position
     if outline_range > 0 and outline_color:
@@ -569,7 +569,7 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（おまさい初期配色復元版）
+# ★ テーマ別名刺画像生成関数（おまさい自然なコントラスト調整版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -597,33 +597,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
             specific_bg_file = cand
             break
 
-    # 2. テーマごとの配色切り替え（「おまさい」は初期のダークネイビー背景配色）
-    if theme == "おまさい":
-        border_outer = (51, 65, 85, 255)
-        border_inner = (148, 163, 184, 255)
-
-        title_box_bg = (30, 41, 59, 220)  # ダークネイビー枠
-        title_box_border = (51, 65, 85, 255)
-
-        text_dark = (248, 250, 252)  # くっきり見える白文字
-        text_sub = (148, 163, 184)  # グレー系サブ文字
-        red_accent = (244, 63, 94)  # 称号ピンク・レッド
-        outline_c = (15, 23, 42)  # 暗い縁取り
-        outline_r = 2
-    else:
-        # 立ち絵①〜⑤用の設定（明るい背景イラストに対応）
-        border_outer = (51, 65, 85, 200)
-        border_inner = (148, 163, 184, 200)
-
-        title_box_bg = (255, 255, 255, 190)  # 薄い半透明白枠
-        title_box_border = (203, 213, 225, 220)
-
-        text_dark = (15, 23, 42)  # ダークネイビー本文
-        text_sub = (71, 85, 105)  # サブテキスト
-        red_accent = (225, 29, 72)  # 称号ローズレッド
-        outline_c = (255, 255, 255)  # 白縁取り
-        outline_r = 2
-
     # 背景PNG画像の読み込み
     if specific_bg_file:
         img = Image.open(specific_bg_file).convert("RGBA")
@@ -634,6 +607,37 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
     # 合成用オーバーレイ
     overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
+
+    # 2. 配色設定（「おまさい」は明るい背景になじむ薄い白ベタ敷き＋ネイビー文字）
+    if theme == "おまさい":
+        # カード全体の視認性を上げるふんわり白い半透明下地
+        card_base_bg = Image.new("RGBA", (width, height), (255, 255, 255, 160))
+        img = Image.alpha_composite(img, card_base_bg)
+
+        border_outer = (51, 65, 85, 220)
+        border_inner = (148, 163, 184, 220)
+
+        title_box_bg = (30, 41, 59, 230)  # 称号枠だけネイビー
+        title_box_border = (51, 65, 85, 255)
+
+        text_dark = (15, 23, 42)  # くっきり見やすい濃いネイビー
+        text_sub = (71, 85, 105)  # サブテキスト
+        red_accent = (244, 63, 94)  # 称号ピンク・レッド
+        outline_c = None  # きつい黒縁取りは廃止
+        outline_r = 0
+    else:
+        # 立ち絵①〜⑤用の設定
+        border_outer = (51, 65, 85, 200)
+        border_inner = (148, 163, 184, 200)
+
+        title_box_bg = (255, 255, 255, 190)  # 薄い半透明白枠
+        title_box_border = (203, 213, 225, 220)
+
+        text_dark = (15, 23, 42)
+        text_sub = (71, 85, 105)
+        red_accent = (225, 29, 72)
+        outline_c = (255, 255, 255)  # 白い柔らかい縁取り
+        outline_r = 2
 
     # 外枠フレーム
     draw.rectangle(
@@ -687,15 +691,12 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         width=2,
     )
 
-    # 称号テキスト
+    # 称号テキスト（おまさい時は白系文字でくっきり表示）
+    title_text_color = (
+        (255, 255, 255) if theme == "おまさい" else red_accent
+    )
     draw_text_with_outline(
-        draw,
-        (70, 170),
-        title,
-        font_title,
-        red_accent,
-        outline_color=outline_c,
-        outline_range=outline_r,
+        draw, (70, 170), title, font_title, title_text_color, outline_range=0
     )
 
     # 4. ランキング見出し
@@ -738,7 +739,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         font_footer,
         text_sub,
         outline_color=outline_c,
-        outline_range=1,
+        outline_range=0,
     )
 
     # 画像レイヤーの合成
@@ -884,6 +885,7 @@ if "title" in st.session_state:
             f"✨ {title} ✨\n\n"
             f"👇 うつログ称号ジェネレーターはこちら！\n"
             f"{app_url}\n\n"
+            f"※保存した名刺画像を添えてポストしてね！\n"
             f"#うつログ称号ジェネレーター #氷室うつろ"
         )
         encoded_text = urllib.parse.quote(raw_tweet_text)
