@@ -155,6 +155,19 @@ def set_bg_image():
         color: #64748b !important;
     }}
     
+    /* 見出し類の不自然な改行を防ぐスタイル設定 */
+    .custom-section-header {{
+        word-break: keep-all !important;
+        overflow-wrap: break-word !important;
+        line-height: 1.4 !important;
+        font-weight: bold !important;
+        color: #0f172a !important;
+    }}
+
+    .custom-section-header span {{
+        display: inline-block !important;
+    }}
+
     /* Xシェア用カスタムリンクボタン */
     .x-share-btn {{
         display: inline-block;
@@ -594,7 +607,7 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（称号フォントサイズ自動調整対応版）
+# ★ テーマ別名刺画像生成関数
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -722,14 +735,13 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         width=2,
     )
 
-    # ---------------------------------------------------------
-    # ★ 称号文字サイズの自動動的調整処理（はみ出し防止）
-    # ---------------------------------------------------------
-    max_title_width = (width - 50) - 70 - 20  # 許容最大横幅: 860px
-    target_font_size = 30  # 標準サイズ
+    # 称号の1行収容＆中央寄せ（センタリング）計算
+    max_title_width = (width - 50) - 70 - 20  # 860px
+    target_font_size = 30
+    final_text_w = 0
 
     if font_path:
-        while target_font_size >= 18:
+        while target_font_size >= 12:
             test_font = ImageFont.truetype(font_path, target_font_size)
             try:
                 bbox = test_font.getbbox(title)
@@ -739,20 +751,23 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
 
             if text_w <= max_title_width:
                 font_title = test_font
+                final_text_w = text_w
                 break
             target_font_size -= 1
         else:
-            font_title = ImageFont.truetype(font_path, 18)
+            font_title = ImageFont.truetype(font_path, 12)
+            final_text_w = max_title_width
     else:
         font_title = ImageFont.load_default()
+        final_text_w = target_font_size * len(title)
 
-    # 文字サイズに応じた上下中央位置のY座標計算
+    title_x = int((width - final_text_w) / 2)
     title_y = 170 + int((30 - target_font_size) * 0.45)
 
     title_text_color = red_accent
     draw_text_with_outline(
         draw,
-        (70, title_y),
+        (title_x, title_y),
         title,
         font_title,
         title_text_color,
@@ -874,11 +889,37 @@ if "title" in st.session_state:
     st.success("解析完了！")
 
     st.markdown("---")
-    st.subheader(f"🏷️ `{target_author}` の獲得称号")
-    st.header(f":red[{title}]")
+
+    # 1. 投稿者名＆「獲得称号」見出し（変な文字での改行を防止）
+    st.markdown(
+        f"""
+        <div class="custom-section-header" style="font-size: 1.25rem; margin-bottom: 0.8rem;">
+            🏷️ <span><code>{target_author}</code> の</span><span>獲得称号</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # 2. 獲得称号テキスト表示（折り返し防止・自動サイズ縮小）
+    st.markdown(
+        f"""
+        <div style="text-align: center; font-size: clamp(1.0rem, 4.5vw, 1.8rem); font-weight: bold; color: #e11d48; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0.5rem 0;">
+            {title}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     st.markdown("---")
 
-    st.subheader("❄️ 特徴的な名詞ランキング 🖋️（Top 5）")
+    # 3. 「特徴的な名詞ランキング」見出し（不自然な文字位置での改行を防止）
+    st.markdown(
+        """
+        <div class="custom-section-header" style="font-size: 1.2rem; margin-bottom: 0.8rem;">
+            ❄️ <span>特徴的な</span><span>名詞ランキング</span> 🖋️<span>（Top 5）</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     current_rank = 1
     for idx, (word, count) in enumerate(top_words, 0):
