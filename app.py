@@ -140,8 +140,21 @@ def set_bg_image():
 
     /* ★ 入力枠・上部解析モード・ボタンの基本デザイン（幅440px） */
     div[data-testid="stTextInput"], 
-    div[data-testid="stRadio"], 
     div[data-testid="stButton"] {{
+        background-color: rgba(255, 255, 255, 0.95) !important;
+        padding: 1rem 1.25rem !important;
+        border-radius: 12px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        margin-bottom: 1rem !important;
+        max-width: 440px !important;
+        width: 100% !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
+        box-sizing: border-box !important;
+    }}
+
+    /* 上部解析モード用ボックス（440px） */
+    .analysis-mode-box div[data-testid="stRadio"] {{
         background-color: rgba(255, 255, 255, 0.95) !important;
         padding: 1rem 1.25rem !important;
         border-radius: 12px !important;
@@ -172,30 +185,40 @@ def set_bg_image():
         gap: 0.5rem !important;
     }}
 
-    /* ★★★ 名刺テーマ選択枠の特例解放（横幅720pxに伸ばして絶対横1行） ★★★ */
+    /* ★★★ 名刺テーマ選択枠の絶対横1行化指定 ★★★ */
     div.element-container:has(.theme-select-box) {{
-        max-width: 720px !important;
+        max-width: 700px !important;
         width: 100% !important;
     }}
 
     .theme-select-box div[data-testid="stRadio"] {{
-        max-width: 720px !important;
+        background-color: rgba(255, 255, 255, 0.95) !important;
+        padding: 1rem 1.25rem !important;
+        border-radius: 12px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        margin-bottom: 1.5rem !important;
+        max-width: 700px !important; /* 幅制限を440pxから700pxに上書き強奪 */
         width: 100% !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
+        box-sizing: border-box !important;
     }}
 
     .theme-select-box div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: nowrap !important; /* 絶対に折り返さない */
+        flex-wrap: nowrap !important; /* 折り返しを絶対禁止 */
         justify-content: space-between !important;
         align-items: center !important;
-        gap: 0.2rem !important;
+        gap: 0.5rem !important;
         width: 100% !important;
+        overflow-x: auto !important; /* 画面が狭くても横スクロール対応 */
+        padding-bottom: 0.2rem !important;
     }}
 
     .theme-select-box div[role="radiogroup"] label {{
-        white-space: nowrap !important; /* 文字の折り返しも防ぐ */
-        margin-right: 0 !important;
+        white-space: nowrap !important; /* 文字の折り返しを防ぐ */
+        flex-shrink: 0 !important;
     }}
 
     div[data-testid="stTextInput"] input {{
@@ -989,7 +1012,7 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
-    # ★ テーマ選択のみ幅720pxに完全拡大（絶対1行固定）
+    # ★ テーマ選択のみ幅700pxまで枠を伸長して横1行表示固定
     st.markdown('<div class="theme-select-box">', unsafe_allow_html=True)
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
