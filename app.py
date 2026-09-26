@@ -79,7 +79,7 @@ def set_bg_image():
     
     /* メインエリア幅 */
     .main .block-container {{
-        max-width: 720px !important;
+        max-width: 760px !important;
         padding-top: 2rem !important;
     }}
 
@@ -99,6 +99,7 @@ def set_bg_image():
         font-size: 1.8rem !important;
         margin-bottom: 1rem !important;
         line-height: 1.4 !important;
+        text-align: center !important;
     }}
 
     /* ルビ（ふりがな）用スタイリング */
@@ -128,26 +129,31 @@ def set_bg_image():
         margin-top: 0.8rem !important;
     }}
 
-    /* 投稿者名入力枠・ボタン枠（白背景・コンパクト幅固定＆中央寄せ） */
-    div[data-testid="stTextInput"], div[data-testid="stButton"] {{
-        background-color: rgba(255, 255, 255, 0.92) !important;
-        padding: 1rem !important;
+    /* ★ コンテナ要素ごとの中央揃え強制指定 */
+    div.element-container:has(div[data-testid="stTextInput"]),
+    div.element-container:has(div[data-testid="stRadio"]),
+    div.element-container:has(div[data-testid="stButton"]),
+    div.element-container:has(div[data-testid="stAlert"]) {{
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }}
+
+    /* ★ すべての白枠（入力枠・解析モード・ボタン・緑枠）の幅と位置を完全一致 */
+    div[data-testid="stTextInput"], 
+    div[data-testid="stRadio"], 
+    div[data-testid="stButton"],
+    div[data-testid="stAlert"] {{
+        background-color: rgba(255, 255, 255, 0.95) !important;
+        padding: 1rem 1.25rem !important;
         border-radius: 12px !important;
         margin-left: auto !important;
         margin-right: auto !important;
         margin-bottom: 1rem !important;
-        max-width: 360px !important; /* 入力枠を短くスマートに */
+        max-width: 440px !important; /* 幅を全要素でピッタリ統一 */
         width: 100% !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
-    }}
-
-    /* 解析モード枠（白背景固定） */
-    div[data-testid="stRadio"] {{
-        background-color: rgba(255, 255, 255, 0.92) !important;
-        padding: 1rem !important;
-        border-radius: 12px !important;
-        margin-bottom: 1rem !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
+        box-sizing: border-box !important;
     }}
 
     /* フォーム枠内文字色（黒・ネイビー固定） */
@@ -159,22 +165,46 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
+    /* 解析モード選択肢は左寄せ */
+    div[data-testid="stRadio"] div[role="radiogroup"] {{
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }}
+
     div[data-testid="stTextInput"] input {{
         color: #0f172a !important;
         background-color: #ffffff !important;
+        text-align: center !important;
     }}
 
     div[data-testid="stTextInput"] input::placeholder {{
         color: #64748b !important;
     }}
 
-    /* 解析完了（成功メッセージ）の緑枠もコンパクトに縮小＆中央寄せ */
+    /* 称号獲得ボタン内部 */
+    div[data-testid="stButton"] button {{
+        background-color: #e11d48 !important;
+        color: #ffffff !important;
+        border: none !important;
+        font-weight: bold !important;
+        padding: 0.6rem 1rem !important;
+        border-radius: 8px !important;
+        width: 100% !important;
+    }}
+    div[data-testid="stButton"] button:hover {{
+        background-color: #be123c !important;
+    }}
+
+    /* 解析完了（緑枠）内部の文字色と背景 */
     div[data-testid="stAlert"] {{
-        max-width: 360px !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-        margin-bottom: 1rem !important;
-        border-radius: 10px !important;
+        background-color: rgba(240, 253, 244, 0.95) !important;
+        border: 1px solid #bbf7d0 !important;
+    }}
+    div[data-testid="stAlert"] p {{
+        color: #166534 !important;
+        text-align: center !important;
+        margin: 0 !important;
     }}
     
     /* Xシェア用カスタムリンクボタン */
@@ -839,12 +869,7 @@ mode = st.radio(
     index=0,
 )
 
-col1, col2 = st.columns([1, 1])
-
-with col1:
-    generate_btn = st.button(
-        "称号を獲得する！", type="primary", use_container_width=True
-    )
+generate_btn = st.button("称号を獲得する！", type="primary")
 
 if generate_btn:
     raw_author = input_name.strip()
