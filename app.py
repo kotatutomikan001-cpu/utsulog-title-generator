@@ -162,9 +162,15 @@ def set_bg_image():
     }}
 
     /* -------------------------------------------------------------
-     * ★ ① 解析モード選択カード（幅440px・縦並び）
+     * ★ ① 解析モード選択（幅440px・完全な白背景・縦並び）
      * ------------------------------------------------------------- */
-    .mode-white-card {{
+    div.element-container:has(.mode-marker) {{
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }}
+
+    div.element-container:has(.mode-marker) div[data-testid="stRadio"] {{
         background-color: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 12px !important;
@@ -176,26 +182,24 @@ def set_bg_image():
         box-sizing: border-box !important;
     }}
 
-    .mode-white-card div[data-testid="stRadio"] {{
-        background: transparent !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-        width: 100% !important;
-    }}
-
-    .mode-white-card div[role="radiogroup"] {{
+    div.element-container:has(.mode-marker) div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: column !important;
         align-items: flex-start !important;
-        justify-content: flex-start !important;
         gap: 0.5rem !important;
         width: 100% !important;
     }}
 
     /* -------------------------------------------------------------
-     * ★ ② 名刺テーマ選択カード（幅700px・横1行固定）
+     * ★ ② 名刺テーマ選択（幅700px・完全な白背景・横1行固定）
      * ------------------------------------------------------------- */
-    .theme-white-card {{
+    div.element-container:has(.theme-marker) {{
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }}
+
+    div.element-container:has(.theme-marker) div[data-testid="stRadio"] {{
         background-color: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 12px !important;
@@ -207,14 +211,7 @@ def set_bg_image():
         box-sizing: border-box !important;
     }}
 
-    .theme-white-card div[data-testid="stRadio"] {{
-        background: transparent !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-        width: 100% !important;
-    }}
-
-    .theme-white-card div[role="radiogroup"] {{
+    div.element-container:has(.theme-marker) div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
@@ -225,9 +222,13 @@ def set_bg_image():
         overflow-x: auto !important;
     }}
 
-    .theme-white-card div[role="radiogroup"] label {{
+    div.element-container:has(.theme-marker) div[role="radiogroup"] label {{
         white-space: nowrap !important;
         flex-shrink: 0 !important;
+    }}
+
+    .mode-marker, .theme-marker {{
+        display: none !important;
     }}
 
     div[data-testid="stTextInput"] input {{
@@ -926,8 +927,8 @@ input_name = st.text_input(
     placeholder="@ユーザー名を入力",
 )
 
-# ★ 解析モード選択（HTML自作白背景カード・幅440px）
-st.markdown('<div class="mode-white-card">', unsafe_allow_html=True)
+# ★ 解析モード選択（マーカーを付与してCSSで直接白背景カード化）
+st.markdown('<div class="mode-marker"></div>', unsafe_allow_html=True)
 mode = st.radio(
     "解析モードを選択してください",
     options=[
@@ -936,7 +937,6 @@ mode = st.radio(
     ],
     index=0,
 )
-st.markdown("</div>", unsafe_allow_html=True)
 
 generate_btn = st.button("称号を獲得する！", type="primary")
 
@@ -1025,8 +1025,8 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
-    # ★ 名刺テーマ選択（HTML自作白背景カード・幅700px・横1行）
-    st.markdown('<div class="theme-white-card">', unsafe_allow_html=True)
+    # ★ 名刺テーマ選択（マーカーを付与してCSSで直接白背景カード化・横1行）
+    st.markdown('<div class="theme-marker"></div>', unsafe_allow_html=True)
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
         options=[
@@ -1040,7 +1040,6 @@ if "title" in st.session_state:
         index=0,
         horizontal=True,
     )
-    st.markdown("</div>", unsafe_allow_html=True)
 
     img_bytes = create_card_image(
         target_author, title, top_words, theme=selected_theme
