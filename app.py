@@ -194,7 +194,7 @@ def set_bg_image():
         background-color: #be123c !important;
     }}
 
-    /* ★ 解析完了の独自メッセージカード（崩れない絶対指定） */
+    /* ★ 解析完了の独自メッセージカード */
     .custom-success-box {{
         background-color: rgba(240, 253, 244, 0.95) !important;
         border: 1px solid #86efac !important;
@@ -914,9 +914,9 @@ if "title" in st.session_state:
     title = st.session_state["title"]
     top_words = st.session_state["top_words"]
 
-    # ★ 崩れない自前スタイルの「解析完了！」表示
+    # ★ チェックマークなしのシンプル「解析完了！」表示
     st.markdown(
-        '<div class="custom-success-box">✅ 解析完了！</div>',
+        '<div class="custom-success-box">解析完了！</div>',
         unsafe_allow_html=True,
     )
 
