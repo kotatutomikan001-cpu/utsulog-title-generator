@@ -94,11 +94,13 @@ def set_bg_image():
         margin-bottom: 1.5rem !important;
     }}
 
+    /* タイトルの中央揃え */
     .header-box h1 {{
         color: #f8fafc !important;
         font-size: 1.8rem !important;
         margin-bottom: 1rem !important;
         line-height: 1.4 !important;
+        text-align: center !important;
     }}
 
     /* ルビ（ふりがな）用スタイリング */
@@ -146,9 +148,32 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
+    /* 解析モード（ラジオボタン）要素のセンタリング */
+    div[data-testid="stRadio"] {{
+        text-align: center !important;
+    }}
+    div[data-testid="stRadio"] > label {{
+        display: block !important;
+        text-align: center !important;
+        width: 100% !important;
+    }}
+    div[data-testid="stRadio"] div[role="radiogroup"] {{
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }}
+
+    /* テキスト入力の中央揃え */
+    div[data-testid="stTextInput"] label {{
+        display: block !important;
+        text-align: center !important;
+        width: 100% !important;
+    }}
     div[data-testid="stTextInput"] input {{
         color: #0f172a !important;
         background-color: #ffffff !important;
+        text-align: center !important;
     }}
 
     div[data-testid="stTextInput"] input::placeholder {{
@@ -162,6 +187,7 @@ def set_bg_image():
         line-height: 1.4 !important;
         font-weight: bold !important;
         color: #0f172a !important;
+        text-align: center !important;
     }}
 
     .custom-section-header span {{
@@ -839,9 +865,10 @@ mode = st.radio(
     index=0,
 )
 
-col1, col2 = st.columns([1, 1])
+# ボタンを中央に配置するために3つのカラムを作成
+btn_col_l, btn_col_m, btn_col_r = st.columns([1, 2, 1])
 
-with col1:
+with btn_col_m:
     generate_btn = st.button(
         "称号を獲得する！", type="primary", use_container_width=True
     )
@@ -890,10 +917,10 @@ if "title" in st.session_state:
 
     st.markdown("---")
 
-    # 1. 投稿者名＆「獲得称号」見出し（変な文字での改行を防止）
+    # 1. 投稿者名＆「獲得称号」見出し（中央揃え・変な文字での改行を防止）
     st.markdown(
         f"""
-        <div class="custom-section-header" style="font-size: 1.25rem; margin-bottom: 0.8rem;">
+        <div class="custom-section-header" style="font-size: 1.25rem; margin-bottom: 0.8rem; text-align: center;">
             🏷️ <span><code>{target_author}</code> の</span><span>獲得称号</span>
         </div>
         """,
@@ -911,10 +938,10 @@ if "title" in st.session_state:
     )
     st.markdown("---")
 
-    # 3. 「特徴的な名詞ランキング」見出し（不自然な文字位置での改行を防止）
+    # 3. 「特徴的な名詞ランキング」見出し（中央揃え・不自然な文字位置での改行を防止）
     st.markdown(
         """
-        <div class="custom-section-header" style="font-size: 1.2rem; margin-bottom: 0.8rem;">
+        <div class="custom-section-header" style="font-size: 1.2rem; margin-bottom: 0.8rem; text-align: center;">
             ❄️ <span>特徴的な</span><span>名詞ランキング</span> 🖋️<span>（Top 5）</span>
         </div>
         """,
