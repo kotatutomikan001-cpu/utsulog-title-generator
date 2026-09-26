@@ -198,98 +198,91 @@ st.markdown(
 
 
 # -------------------------------------------------------------
-# 2. コメント取得関数（起動直後の読み込み安定化版）
+# 2. コメント取得関数（キャッシュ＆負荷保護・エラーハンドリング強化版）
 # -------------------------------------------------------------
+@st.cache_data(ttl=600, show_spinner=False)
 def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
     url = "https://utsulog.in"
     comments = []
 
-    with sync_playwright() as p:
-        chromium_path = (
-            shutil.which("chromium")
-            or shutil.which("chromium-browser")
-            or "/usr/bin/chromium"
-        )
-
-        if os.path.exists(chromium_path):
-            browser = p.chromium.launch(
-                headless=True,
-                executable_path=chromium_path,
-                args=["--no-sandbox", "--disable-dev-shm-usage"],
-            )
-        else:
-            browser = p.chromium.launch(headless=True)
-
-        context = browser.new_context()
-        page = context.new_page()
-
-        page.route(
-            "**/*.{png,jpg,jpeg,gif,svg,webp}", lambda route: route.abort()
-        )
-
-        page.goto(url, wait_until="domcontentloaded")
-
-        try:
-            author_input = page.locator(
-                'input[placeholder*="hiroki"], input[name*="author"]'
-            ).first
-            if not author_input.is_visible():
-                author_input = page.locator(
-                    'input:not([placeholder*="キーワード"])'
-                ).first
-
-            author_input.fill(author_name)
-            author_input.press("Enter")
-
-            # 初回アクセス時の要素レンダリング完了を最大5秒待機
-            page.wait_for_selector("p.text-slate-700", timeout=5000)
-            time.sleep(1.0)
-        except Exception:
-            time.sleep(2.0)
-
-        prev_count = 0
-        same_count_turns = 0
-
-        progress_bar = st.progress(0)
-        status_text = st.empty()
-
-        for i in range(max_scrolls):
-            comment_elements = page.query_selector_all("p.text-slate-700")
-            current_count = len(comment_elements)
-
-            progress = int(((i + 1) / max_scrolls) * 100)
-            progress_bar.progress(progress)
-            status_text.text(
-                f"データ収集・スクロール中... ({current_count}件取得済み)"
+    try:
+        with sync_playwright() as p:
+            chromium_path = (
+                shutil.which("chromium")
+                or shutil.which("chromium-browser")
+                or "/usr/bin/chromium"
             )
 
-            if current_count == 0:
-                time.sleep(1.0)
-                continue
-
-            if current_count == prev_count:
-                same_count_turns += 1
-                if same_count_turns >= 3:
-                    break
+            if os.path.exists(chromium_path):
+                browser = p.chromium.launch(
+                    headless=True,
+                    executable_path=chromium_path,
+                    args=["--no-sandbox", "--disable-dev-shm-usage"],
+                )
             else:
-                same_count_turns = 0
+                browser = p.chromium.launch(headless=True)
 
-            prev_count = current_count
+            context = browser.new_context()
+            page = context.new_page()
 
-            last_elem = comment_elements[-1]
-            last_elem.scroll_into_view_if_needed()
-            page.keyboard.press("PageDown")
-            time.sleep(scroll_delay)
+            page.route(
+                "**/*.{png,jpg,jpeg,gif,svg,webp}", lambda route: route.abort()
+            )
 
-        final_elements = page.query_selector_all("p.text-slate-700")
-        for elem in final_elements:
-            text = elem.inner_text().strip()
-            if text and text not in comments:
-                comments.append(text)
+            page.goto(url, wait_until="domcontentloaded")
 
-        status_text.empty()
-        progress_bar.empty()
-        browser.close()
+            try:
+                author_input = page.locator(
+                    'input[placeholder*="hiroki"], input[name*="author"]'
+                ).first
+                if not author_input.is_visible():
+                    author_input = page.locator(
+                        'input:not([placeholder*="キーワード"])'
+                    ).first
+
+                author_input.fill(author_name)
+                author_input.press("Enter")
+
+                page.wait_for_selector("p.text-slate-700", timeout=5000)
+                time.sleep(1.0)
+            except Exception:
+                time.sleep(2.0)
+
+            prev_count = 0
+            same_count_turns = 0
+
+            for i in range(max_scrolls):
+                comment_elements = page.query_selector_all("p.text-slate-700")
+                current_count = len(comment_elements)
+
+                if current_count == 0:
+                    time.sleep(1.0)
+                    continue
+
+                if current_count == prev_count:
+                    same_count_turns += 1
+                    if same_count_turns >= 3:
+                        break
+                else:
+                    same_count_turns = 0
+
+                prev_count = current_count
+
+                last_elem = comment_elements[-1]
+                last_elem.scroll_into_view_if_needed()
+                page.keyboard.press("PageDown")
+                time.sleep(scroll_delay)
+
+            final_elements = page.query_selector_all("p.text-slate-700")
+            for elem in final_elements:
+                text = elem.inner_text().strip()
+                if text and text not in comments:
+                    comments.append(text)
+
+            browser.close()
+    except Exception as e:
+        print(f"fetch_comments_web error: {e}")
+        return []
 
     return comments
 
@@ -822,7 +815,7 @@ if generate_btn:
             st.session_state["top_words"] = top_words
         else:
             st.error(
-                "コメントが取得できませんでした。投稿者名を確認してください。"
+                "コメントが取得できませんでした。投稿者名を確認するか、混雑している場合は少し時間をおいて再度お試しください。"
             )
     else:
         st.warning("投稿者名を入力してね！")
