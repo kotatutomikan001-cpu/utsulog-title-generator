@@ -185,7 +185,7 @@ def set_bg_image():
         gap: 0.5rem !important;
     }}
 
-    /* ★★★ 名刺テーマ選択枠の絶対横1行化指定 ★★★ */
+    /* ★★★ 名刺テーマ選択枠（横1行＋綺麗な白枠復元） ★★★ */
     div.element-container:has(.theme-select-box) {{
         max-width: 700px !important;
         width: 100% !important;
@@ -198,7 +198,7 @@ def set_bg_image():
         margin-left: auto !important;
         margin-right: auto !important;
         margin-bottom: 1.5rem !important;
-        max-width: 700px !important; /* 幅制限を440pxから700pxに上書き強奪 */
+        max-width: 700px !important;
         width: 100% !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
         box-sizing: border-box !important;
@@ -207,17 +207,17 @@ def set_bg_image():
     .theme-select-box div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: nowrap !important; /* 折り返しを絶対禁止 */
+        flex-wrap: nowrap !important;
         justify-content: space-between !important;
         align-items: center !important;
         gap: 0.5rem !important;
         width: 100% !important;
-        overflow-x: auto !important; /* 画面が狭くても横スクロール対応 */
+        overflow-x: auto !important;
         padding-bottom: 0.2rem !important;
     }}
 
     .theme-select-box div[role="radiogroup"] label {{
-        white-space: nowrap !important; /* 文字の折り返しを防ぐ */
+        white-space: nowrap !important;
         flex-shrink: 0 !important;
     }}
 
