@@ -71,6 +71,7 @@ def set_bg_image():
         background-size: cover !important;
         background-position: center !important;
         background-attachment: fixed !important;
+        color: #0f172a !important;
     }}
     
     [data-testid="stHeader"] {{
@@ -130,26 +131,38 @@ def set_bg_image():
         margin-top: 0.8rem !important;
     }}
 
-    /* 下のフォーム枠（白背景・幅を解析モード枠サイズで固定＆完全センタリング） */
-    div[data-testid="stTextInput"], div[data-testid="stRadio"], div[data-testid="stButton"] {{
-        background-color: rgba(255, 255, 255, 0.92) !important;
-        padding: 1rem 1.25rem !important;
+    /* Streamlitコンテナブロック自体のセンタリング制御 */
+    div.element-container:has(div[data-testid="stTextInput"]),
+    div.element-container:has(div[data-testid="stRadio"]),
+    div.element-container:has(div[data-testid="stButton"]) {{
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }}
+
+    /* フォーム白枠（コンパクトな幅360px・完全センタリング配置） */
+    div[data-testid="stTextInput"], 
+    div[data-testid="stRadio"], 
+    div[data-testid="stButton"] {{
+        background-color: rgba(255, 255, 255, 0.95) !important;
+        padding: 0.9rem 1.1rem !important;
         border-radius: 12px !important;
         margin-left: auto !important;
         margin-right: auto !important;
         margin-bottom: 1rem !important;
-        max-width: 440px !important; /* 幅をすっきり統一 */
+        max-width: 360px !important; /* より小さくスマートな幅に設定 */
         width: 100% !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
     }}
 
-    /* フォーム枠内文字色 */
+    /* ダークモード対策：フォーム枠内の文字色・ラベル */
     div[data-testid="stTextInput"] label, 
     div[data-testid="stRadio"] label, 
     div[data-testid="stRadio"] p,
-    div[role="radiogroup"] label span {{
+    div[role="radiogroup"] label span,
+    .stMarkdown, p, span, h1, h2, h3, h4 {{
         color: #0f172a !important;
-        font-weight: 600 !important;
+        font-weight: 600;
     }}
 
     /* 解析モード（ラジオボタン）枠内選択肢は左寄せ */
@@ -174,12 +187,37 @@ def set_bg_image():
         color: #0f172a !important;
         background-color: #ffffff !important;
         text-align: center !important;
+        border: 1px solid #cbd5e1 !important;
     }}
 
     div[data-testid="stTextInput"] input::placeholder {{
         color: #64748b !important;
     }}
     
+    /* 称号獲得ボタンのスタイル */
+    div[data-testid="stButton"] button {{
+        background-color: #e11d48 !important;
+        color: #ffffff !important;
+        border: none !important;
+        font-weight: bold !important;
+        padding: 0.5rem 1rem !important;
+        border-radius: 8px !important;
+    }}
+    div[data-testid="stButton"] button:hover {{
+        background-color: #be123c !important;
+    }}
+
+    /* ダークモード対策：成功・完了メッセージ枠 */
+    div[data-testid="stAlert"] {{
+        background-color: rgba(240, 253, 244, 0.95) !important;
+        color: #166534 !important;
+        border: 1px solid #bbf7d0 !important;
+        border-radius: 10px !important;
+    }}
+    div[data-testid="stAlert"] p {{
+        color: #166534 !important;
+    }}
+
     /* 見出し類の不自然な改行を防ぐスタイル設定 */
     .custom-section-header {{
         word-break: keep-all !important;
@@ -197,7 +235,7 @@ def set_bg_image():
     /* WEB上の称号文字表示 */
     .web-title-display {{
         text-align: center !important;
-        font-size: clamp(0.95rem, 3.2vw, 1.8rem) !important;
+        font-size: clamp(1.0rem, 3.5vw, 1.8rem) !important;
         font-weight: bold !important;
         color: #e11d48 !important;
         white-space: normal !important;
@@ -877,9 +915,7 @@ mode = st.radio(
     index=0,
 )
 
-generate_btn = st.button(
-    "称号を獲得する！", type="primary", use_container_width=True
-)
+generate_btn = st.button("称号を獲得する！", type="primary")
 
 if generate_btn:
     raw_author = input_name.strip()
