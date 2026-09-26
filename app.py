@@ -584,7 +584,7 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（ルビ位置修正・背景調整版）
+# ★ テーマ別名刺画像生成関数（おまさい赤字統一版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -636,7 +636,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         outline_c = None
         outline_r = 0
     else:
-        # うつろテーマ群：イラストを背景としてくっきり魅せるため、カード全体に薄い白オーバーレイを配置
         card_base_bg = Image.new("RGBA", (width, height), (255, 255, 255, 120))
         img = Image.alpha_composite(img, card_base_bg)
 
@@ -675,7 +674,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         ) = font_footer = ImageFont.load_default()
 
     # 1. ヘッダー
-    # 「うつろ書架」全体（漢字の上中央付近）へ乗るようにX=85へ配置
     draw_text_with_outline(
         draw,
         (85, 28),
@@ -686,7 +684,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         outline_range=outline_r,
     )
 
-    # メインタイトル「うつろ書架の称号診断」
     draw_text_with_outline(
         draw,
         (50, 45),
@@ -716,9 +713,8 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         width=2,
     )
 
-    title_text_color = (
-        (255, 255, 255) if theme == "おまさい" else red_accent
-    )
+    # 「おまさい」含む全テーマで称号文字色を赤系（red_accent）に統一！
+    title_text_color = red_accent
     draw_text_with_outline(
         draw, (70, 170), title, font_title, title_text_color, outline_range=0
     )
