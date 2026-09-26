@@ -71,7 +71,6 @@ def set_bg_image():
         background-size: cover !important;
         background-position: center !important;
         background-attachment: fixed !important;
-        color: #0f172a !important;
     }}
     
     [data-testid="stHeader"] {{
@@ -80,7 +79,7 @@ def set_bg_image():
     
     /* メインエリア幅 */
     .main .block-container {{
-        max-width: 760px !important;
+        max-width: 720px !important;
         padding-top: 2rem !important;
     }}
 
@@ -95,13 +94,11 @@ def set_bg_image():
         margin-bottom: 1.5rem !important;
     }}
 
-    /* タイトルの中央揃え */
     .header-box h1 {{
         color: #f8fafc !important;
         font-size: 1.8rem !important;
         margin-bottom: 1rem !important;
         line-height: 1.4 !important;
-        text-align: center !important;
     }}
 
     /* ルビ（ふりがな）用スタイリング */
@@ -131,108 +128,33 @@ def set_bg_image():
         margin-top: 0.8rem !important;
     }}
 
-    /* 入力フォーム群の親要素センタリング */
-    div.element-container:has(div.input-card-box) {{
-        display: flex !important;
-        justify-content: center !important;
-        width: 100% !important;
-    }}
-
-    /* 入力枠・解析モード・称号獲得ボタン専用の白カード枠（幅440pxでジャスト統一） */
-    .input-card-box {{
-        background-color: rgba(255, 255, 255, 0.95) !important;
-        padding: 1rem 1.25rem !important;
+    /* 下のフォーム枠（白背景固定） */
+    div[data-testid="stTextInput"], div[data-testid="stRadio"], div[data-testid="stButton"] {{
+        background-color: rgba(255, 255, 255, 0.92) !important;
+        padding: 1rem !important;
         border-radius: 12px !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
         margin-bottom: 1rem !important;
-        max-width: 440px !important;
-        width: 100% !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
     }}
 
-    .input-card-box label, .input-card-box p, .input-card-box span {{
+    /* フォーム枠内文字色（黒・ネイビー固定） */
+    div[data-testid="stTextInput"] label, 
+    div[data-testid="stRadio"] label, 
+    div[data-testid="stRadio"] p,
+    div[role="radiogroup"] label span {{
         color: #0f172a !important;
         font-weight: 600 !important;
     }}
 
-    /* 解析モード選択肢は左寄せ */
-    .input-card-box div[data-testid="stRadio"] div[role="radiogroup"] {{
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-    }}
-
-    /* テキスト入力枠内部 */
-    .input-card-box input {{
+    div[data-testid="stTextInput"] input {{
         color: #0f172a !important;
         background-color: #ffffff !important;
-        text-align: center !important;
-        border: 1px solid #cbd5e1 !important;
     }}
 
-    /* 称号獲得ボタンのスタイル */
-    .input-card-box button {{
-        background-color: #e11d48 !important;
-        color: #ffffff !important;
-        border: none !important;
-        font-weight: bold !important;
-        padding: 0.6rem 1rem !important;
-        border-radius: 8px !important;
-        width: 100% !important;
+    div[data-testid="stTextInput"] input::placeholder {{
+        color: #64748b !important;
     }}
-    .input-card-box button:hover {{
-        background-color: #be123c !important;
-    }}
-
-    /* ★ 結果表示エリア（画面幅いっぱいのゆったり白い可読性カード） */
-    .result-card-panel {{
-        background-color: rgba(255, 255, 255, 0.95) !important;
-        border-radius: 16px !important;
-        padding: 1.5rem 1.8rem !important;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
-        margin-top: 1.5rem !important;
-        margin-bottom: 2rem !important;
-        width: 100% !important;
-        color: #0f172a !important;
-    }}
-
-    /* ★ 名刺選択ラジオボタンを最初のように横並び1行で綺麗に表示 */
-    .result-card-panel div[data-testid="stRadio"] div[role="radiogroup"] {{
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: wrap !important;
-        justify-content: center !important;
-        gap: 1rem !important;
-    }}
-
-    /* WEB上の称号文字表示（途切れず1行で全文迫力表示） */
-    .web-title-display {{
-        text-align: center !important;
-        font-size: clamp(1.0rem, 2.8vw, 1.7rem) !important;
-        font-weight: bold !important;
-        color: #e11d48 !important;
-        white-space: normal !important;
-        word-break: break-word !important;
-        padding: 0.6rem 0 !important;
-        line-height: 1.4 !important;
-        width: 100% !important;
-    }}
-
-    /* 見出し類の不自然な改行を防ぐスタイル設定 */
-    .custom-section-header {{
-        word-break: keep-all !important;
-        overflow-wrap: break-word !important;
-        line-height: 1.4 !important;
-        font-weight: bold !important;
-        color: #0f172a !important;
-        text-align: center !important;
-    }}
-
-    .custom-section-header span {{
-        display: inline-block !important;
-    }}
-
+    
     /* Xシェア用カスタムリンクボタン */
     .x-share-btn {{
         display: inline-block;
@@ -471,14 +393,6 @@ def generate_nickname(comments):
         "―",
         "〜",
         "～",
-        "ーーー",
-        "ーー",
-        "---",
-        "--",
-        "───",
-        "──",
-        "━━━",
-        "━━",
     }
 
     allowed_subcategories = [
@@ -500,8 +414,6 @@ def generate_nickname(comments):
         "]+",
         flags=re.UNICODE,
     )
-
-    dash_pattern = re.compile(r"^[\─\―\‐\-\—\━\ー\─\=]+$")
 
     for comment in comments:
         working_comment = symbol_pattern.sub(" ", comment)
@@ -535,7 +447,7 @@ def generate_nickname(comments):
                         len(word) > 1
                         and word not in stop_words
                         and not symbol_pattern.search(word)
-                        and not dash_pattern.match(word)
+                        and not re.match(r"^[\.\…\―\─\～\〜]+$", word)
                     ):
                         words.append(word)
             elif pos_main in ["カスタム名詞", "未知語"]:
@@ -544,7 +456,7 @@ def generate_nickname(comments):
                     len(word) > 1
                     and word not in stop_words
                     and not symbol_pattern.search(word)
-                    and not dash_pattern.match(word)
+                    and not re.match(r"^[\.\…\―\─\～\〜]+$", word)
                 ):
                     words.append(word)
 
@@ -672,7 +584,7 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数
+# ★ テーマ別名刺画像生成関数（「おまさい」称号背景透過版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -715,6 +627,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         border_outer = (51, 65, 85, 220)
         border_inner = (148, 163, 184, 220)
 
+        # 薄い水色のまま透過処理（アルファ値 230 → 140）
         title_box_bg = (224, 242, 254, 140)
         title_box_border = (186, 230, 253, 200)
 
@@ -892,27 +805,24 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
 # -------------------------------------------------------------
 # 4. 画面上の操作UI部分
 # -------------------------------------------------------------
-
-# 各UIエレメントを白カード枠HTMLで囲んで表示する関数
-st.markdown('<div class="input-card-box">', unsafe_allow_html=True)
 input_name = st.text_input(
     "投稿者名を入力してください（@以降のユーザー名）",
     value="",
     placeholder="@ユーザー名を入力",
 )
-st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown('<div class="input-card-box">', unsafe_allow_html=True)
 mode = st.radio(
     "解析モードを選択してください",
     options=["⚡ 爆速モード（直近〜500件程度）", "🐢 じっくり解析モード（直近〜3000件程度）"],
     index=0,
 )
-st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown('<div class="input-card-box">', unsafe_allow_html=True)
-generate_btn = st.button("称号を獲得する！", type="primary")
-st.markdown("</div>", unsafe_allow_html=True)
+col1, col2 = st.columns([1, 1])
+
+with col1:
+    generate_btn = st.button(
+        "称号を獲得する！", type="primary", use_container_width=True
+    )
 
 if generate_btn:
     raw_author = input_name.strip()
@@ -956,23 +866,13 @@ if "title" in st.session_state:
 
     st.success("解析完了！")
 
-    # 結果全体を保護する可読性向上白カードパネルを開始
-    st.markdown('<div class="result-card-panel">', unsafe_allow_html=True)
+    st.markdown("---")
+    st.subheader(f"🏷️ `{target_author}` の獲得称号")
 
-    # 1. 投稿者名＆「獲得称号」見出し
+    # 称号が画面上で途切れないよう動的にサイズ補正（HTML標準スタイル）
     st.markdown(
         f"""
-        <div class="custom-section-header" style="font-size: 1.25rem; margin-bottom: 0.8rem; text-align: center;">
-            🏷️ <span><code>{target_author}</code> の</span><span>獲得称号</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # 2. 獲得称号テキスト表示（途切れず全文表示）
-    st.markdown(
-        f"""
-        <div class="web-title-display">
+        <div style="font-size: clamp(1.1rem, 3.5vw, 1.8rem); font-weight: bold; color: #e11d48; margin: 0.5rem 0;">
             {title}
         </div>
         """,
@@ -980,15 +880,7 @@ if "title" in st.session_state:
     )
     st.markdown("---")
 
-    # 3. 「特徴的な名詞ランキング」見出し
-    st.markdown(
-        """
-        <div class="custom-section-header" style="font-size: 1.2rem; margin-bottom: 0.8rem; text-align: center;">
-            ❄️ <span>特徴的な</span><span>名詞ランキング</span> 🖋️<span>（Top 5）</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.subheader("❄️ 特徴的な名詞ランキング 🖋️（Top 5）")
 
     current_rank = 1
     for idx, (word, count) in enumerate(top_words, 0):
@@ -998,19 +890,11 @@ if "title" in st.session_state:
             current_rank = idx + 1
             rank_label = f"第 {current_rank} 位"
 
-        st.markdown(
-            f'<div style="color: #0f172a !important; font-weight: bold; margin-bottom: 0.3rem; text-align: center;">'
-            f'{rank_label}: <code style="color: #0369a1 !important; background: #e0f2fe !important; padding: 0.2rem 0.4rem; border-radius: 4px;">{word}</code> '
-            f'（{count} 回出現）</div>',
-            unsafe_allow_html=True,
-        )
+        st.write(f"**{rank_label}**: `{word}` （{count} 回出現）")
 
     st.markdown("---")
 
-    st.markdown(
-        '<h3 style="color: #0f172a !important; font-weight: bold; font-size: 1.25rem; margin-top: 1rem; text-align: center;">🎴 獲得称号名刺</h3>',
-        unsafe_allow_html=True,
-    )
+    st.subheader("🎴 獲得称号名刺")
 
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
@@ -1072,6 +956,3 @@ if "title" in st.session_state:
             f'<a href="{tweet_url}" target="_blank" class="x-share-btn" style="width: 100%; display: block; text-align: center;">𝕏 に称号をポストする</a>',
             unsafe_allow_html=True,
         )
-
-    # 結果全体パネルを閉じる
-    st.markdown("</div>", unsafe_allow_html=True)
