@@ -163,11 +163,14 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
-    /* 解析モード選択肢は左寄せ */
+    /* ★ 解析モード選択肢・デザインテーマ選択肢を横一列に配置 */
     div[data-testid="stRadio"] div[role="radiogroup"] {{
         display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
     }}
 
     div[data-testid="stTextInput"] input {{
@@ -870,6 +873,7 @@ mode = st.radio(
     "解析モードを選択してください",
     options=["⚡ 爆速モード（直近〜500件程度）", "🐢 じっくり解析モード（直近〜3000件程度）"],
     index=0,
+    horizontal=True,
 )
 
 generate_btn = st.button("称号を獲得する！", type="primary")
@@ -914,7 +918,6 @@ if "title" in st.session_state:
     title = st.session_state["title"]
     top_words = st.session_state["top_words"]
 
-    # ★ チェックマークなしのシンプル「解析完了！」表示
     st.markdown(
         '<div class="custom-success-box">解析完了！</div>',
         unsafe_allow_html=True,
