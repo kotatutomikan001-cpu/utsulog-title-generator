@@ -282,7 +282,7 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（カスタム名詞拡充・単語分散テンプレート版）
+# 3. 称号生成関数
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
@@ -403,7 +403,6 @@ def generate_nickname(comments):
     for comment in comments:
         working_comment = symbol_pattern.sub(" ", comment)
 
-        # 1. カスタム名詞の保護抽出
         for ck in custom_keywords:
             if ck in working_comment:
                 count_ck = working_comment.count(ck)
@@ -421,7 +420,6 @@ def generate_nickname(comments):
                     words.append(target_word)
                 working_comment = working_comment.replace(ck, " ")
 
-        # 2. 通常の形態素解析
         for token in tokenizer.tokenize(working_comment):
             pos_details = token.part_of_speech.split(",")
             pos_main = pos_details[0]
@@ -453,16 +451,13 @@ def generate_nickname(comments):
     if not top_words:
         return "【静寂を愛する白銀の図書委員】", top_words
 
-    # 内部規則用ハッシュ計算（出現回数の合計＋メイン単語の文字コード和）
     total_count_sum = sum([count for word, count in top_words])
     primary_word_code = sum([ord(c) for c in top_words[0][0]])
     hash_value = total_count_sum + primary_word_code
 
-    # 同率1位の判定処理
     max_count = top_words[0][1]
     top_tier_words = [word for word, count in top_words if count == max_count]
 
-    # 同率1位が3つ以上の場合の限定称号
     if len(top_tier_words) >= 3:
         t1, t2, t3 = (
             top_tier_words[0],
@@ -491,7 +486,7 @@ def generate_nickname(comments):
         else ("言葉" if top1 != "言葉" else "話題")
     )
 
-    if count1 >= 50:
+    if count1 >= 40:
         templates = [
             f"【{top1}の白銀図書館で{top2}の真理を刻みし絶対神】",
             f"【{top1}を司る万年筆で{top2}の創世記を編む創世主】",
@@ -504,7 +499,7 @@ def generate_nickname(comments):
             f"【{top1}のインクで歴史を染め{top2}の運命を執筆せし絶対神】",
             f"【{top1}の全書庫を制し{top2}の真髄に到達せし超越者】",
         ]
-    elif count1 >= 30:
+    elif count1 >= 25:
         templates = [
             f"【{top1}を白銀に刻み{top2}の物語を認める覇王】",
             f"【{top1}の空に想いを馳せ{top2}の章を詠む英雄】",
@@ -517,7 +512,7 @@ def generate_nickname(comments):
             f"【{top1}に栞を挟み{top2}の魅力を熱く語る探求者】",
             f"【{top1}の美しい筆致で{top2}の誌面を彩る覇王】",
         ]
-    elif count1 >= 15:
+    elif count1 >= 10:
         templates = [
             f"【{top1}のインクを紡ぎ{top2}の軌跡を記す探求者】",
             f"【{top1}のノートを開き{top2}の世界を拓くマスター】",
@@ -551,62 +546,62 @@ def generate_nickname(comments):
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数
+# ★ テーマ別名刺画像生成関数（PNG直接挿入対応版）
 # -------------------------------------------------------------
-def create_card_image(author_name, title, top_words, theme="スノー・パステル"):
+def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
 
+    # 1. テーマに応じたファイル名の検索
     specific_bg_file = None
-    if theme == "スタイリッシュ・ダーク" and os.path.exists("bg_dark.png"):
-        specific_bg_file = "bg_dark.png"
-    elif theme == "プレミアム・ゴールド" and os.path.exists("bg_gold.png"):
-        specific_bg_file = "bg_gold.png"
-    elif theme == "スノー・パステル" and os.path.exists("bg_snow.png"):
-        specific_bg_file = "bg_snow.png"
-    elif os.path.exists("bg.png"):
-        specific_bg_file = "bg.png"
-    elif os.path.exists("bg.jpg"):
-        specific_bg_file = "bg.jpg"
 
-    if theme == "スタイリッシュ・ダーク":
-        overlay_color = (15, 23, 42, 220)
-        border_outer = (51, 65, 85)
-        border_inner = (148, 163, 184)
-        title_box_bg = (30, 41, 59)
-        title_box_border = (51, 65, 85)
-        text_dark = (248, 250, 252)
-        text_sub = (148, 163, 184)
-        red_accent = (244, 63, 94)
-    elif theme == "プレミアム・ゴールド":
-        overlay_color = (20, 20, 25, 210)
-        border_outer = (217, 119, 6)
-        border_inner = (251, 191, 36)
-        title_box_bg = (35, 30, 20)
-        title_box_border = (217, 119, 6)
-        text_dark = (254, 243, 199)
-        text_sub = (217, 119, 6)
-        red_accent = (251, 191, 36)
+    if theme == "おまさい":
+        candidates = ["bg_omasai.png", "bg_0.png", "bg.png", "bg.jpg"]
+    elif theme == "立ち絵①":
+        candidates = ["bg_1.png", "bg_1.jpg"]
+    elif theme == "立ち絵②":
+        candidates = ["bg_2.png", "bg_2.jpg"]
+    elif theme == "立ち絵③":
+        candidates = ["bg_3.png", "bg_3.jpg"]
+    elif theme == "立ち絵④":
+        candidates = ["bg_4.png", "bg_4.jpg"]
+    elif theme == "立ち絵⑤":
+        candidates = ["bg_5.png", "bg_5.jpg"]
     else:
-        overlay_color = (255, 255, 255, 160)
-        border_outer = (30, 41, 59)
-        border_inner = (71, 85, 105)
-        title_box_bg = (255, 255, 255)
-        title_box_border = (226, 232, 240)
-        text_dark = (15, 23, 42)
-        text_sub = (51, 65, 85)
-        red_accent = (225, 29, 72)
+        candidates = ["bg.png", "bg.jpg"]
 
+    for cand in candidates:
+        if os.path.exists(cand):
+            specific_bg_file = cand
+            break
+
+    # 固定カラー定義（文字が綺麗に見えるホワイト・ゴールド系）
+    overlay_color = (
+        15,
+        23,
+        42,
+        140,
+    )  # 薄いネイビー透過（文字の視認性確保用）
+    border_outer = (51, 65, 85)
+    border_inner = (148, 163, 184)
+    title_box_bg = (30, 41, 59, 220)  # タイトル枠背景（半透明）
+    title_box_border = (148, 163, 184)
+    text_dark = (248, 250, 252)  # 文字色（白）
+    text_sub = (203, 213, 225)  # サブ文字色（薄グレー）
+    red_accent = (244, 63, 94)  # 称号テキスト色（ピンク・赤系）
+
+    # 背景PNG画像の読み込み
     if specific_bg_file:
-        img = Image.open(specific_bg_file).convert("RGB")
+        img = Image.open(specific_bg_file).convert("RGBA")
         img = img.resize((width, height))
     else:
-        img = Image.new("RGB", (width, height), color=(240, 248, 255))
+        # 画像ファイルがない場合のデフォルト背景
+        img = Image.new("RGBA", (width, height), color=(30, 41, 59, 255))
 
-    overlay = Image.new("RGBA", (width, height), overlay_color)
-    img = Image.alpha_composite(img.convert("RGBA"), overlay).convert("RGB")
+    # 文字枠・テキスト合成用の描画キャンバス
+    overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
 
-    draw = ImageDraw.Draw(img)
-
+    # 外枠フレーム
     draw.rectangle(
         [20, 20, width - 20, height - 20], outline=border_outer, width=3
     )
@@ -628,11 +623,13 @@ def create_card_image(author_name, title, top_words, theme="スノー・パス�
             font_rank_item
         ) = font_footer = ImageFont.load_default()
 
+    # ヘッダー・投稿者名
     draw.text(
         (50, 45), "うつログ称号ジェネレーター", fill=text_sub, font=font_header
     )
     draw.text((50, 85), f"投稿者: {author_name}", fill=text_dark, font=font_author)
 
+    # 称号枠
     draw.rectangle(
         [50, 145, width - 50, 235],
         fill=title_box_bg,
@@ -641,6 +638,7 @@ def create_card_image(author_name, title, top_words, theme="スノー・パス�
     )
     draw.text((70, 170), title, fill=red_accent, font=font_title)
 
+    # ランキング
     draw.text(
         (50, 265),
         "◇ 特徴的な名詞ランキング",
@@ -665,6 +663,7 @@ def create_card_image(author_name, title, top_words, theme="スノー・パス�
         )
         y_pos += 42
 
+    # フッター
     draw.text(
         (50, 490),
         "#うつログ称号ジェネレーター  |  氷室うつろ非公式ファンツール",
@@ -672,8 +671,11 @@ def create_card_image(author_name, title, top_words, theme="スノー・パス�
         font=font_footer,
     )
 
+    # 背景画像とテキストレイヤーを合成
+    final_img = Image.alpha_composite(img, overlay).convert("RGB")
+
     buf = io.BytesIO()
-    img.save(buf, format="PNG")
+    final_img.save(buf, format="PNG")
     return buf.getvalue()
 
 
@@ -762,21 +764,23 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
+    # 新しい選択肢テーマ（おまさい ＋ 立ち絵①〜⑤）
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
         options=[
-            "❄️ スノー・パステル",
-            "🌑 スタイリッシュ・ダーク",
-            "✨ プレミアム・ゴールド",
+            "おまさい",
+            "立ち絵①",
+            "立ち絵②",
+            "立ち絵③",
+            "立ち絵④",
+            "立ち絵⑤",
         ],
         index=0,
         horizontal=True,
     )
 
-    theme_name = selected_theme.split(" ")[1]
-
     img_bytes = create_card_image(
-        target_author, title, top_words, theme=theme_name
+        target_author, title, top_words, theme=selected_theme
     )
 
     st.image(
@@ -791,7 +795,7 @@ if "title" in st.session_state:
         st.download_button(
             label="💾 選択した名刺画像を保存する",
             data=img_bytes,
-            file_name=f"utsulog_card_{target_author}.png",
+            file_name=f"utsulog_card_{target_author}_{selected_theme}.png",
             mime="image/png",
             use_container_width=True,
         )
