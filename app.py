@@ -152,28 +152,6 @@ def set_bg_image():
         box-sizing: border-box !important;
     }}
 
-    /* 上部解析モード用ボックス（440px・白背景・左寄せ） */
-    .analysis-mode-box div[data-testid="stRadio"] {{
-        background-color: rgba(255, 255, 255, 0.95) !important;
-        padding: 1rem 1.25rem !important;
-        border-radius: 12px !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-        margin-bottom: 1rem !important;
-        max-width: 440px !important;
-        width: 100% !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
-        box-sizing: border-box !important;
-    }}
-
-    .analysis-mode-box div[data-testid="stRadio"] div[role="radiogroup"] {{
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        justify-content: flex-start !important;
-        gap: 0.5rem !important;
-    }}
-
     /* フォーム枠内文字色（黒・ネイビー固定） */
     div[data-testid="stTextInput"] label, 
     div[data-testid="stRadio"] label, 
@@ -183,26 +161,76 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
-    /* ★★★ デザインテーマ用ラジオボタン内部の強制横1行スタイル ★★★ */
-    .direct-white-card div[data-testid="stRadio"] {{
+    /* -------------------------------------------------------------
+     * ★ ① 解析モード選択コンテナ（幅440px・縦並び・白枠）
+     * ------------------------------------------------------------- */
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.mode-radio-marker) {{
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 12px !important;
+        padding: 1rem 1.25rem !important;
+        margin: 0 auto 1rem auto !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
+        max-width: 440px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }}
+
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.mode-radio-marker) div[data-testid="stRadio"] {{
         background: transparent !important;
         padding: 0 !important;
         box-shadow: none !important;
         width: 100% !important;
     }}
 
-    .direct-white-card div[role="radiogroup"] {{
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.mode-radio-marker) div[role="radiogroup"] {{
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        gap: 0.5rem !important;
+        width: 100% !important;
+    }}
+
+    /* 隠しマーカーを非表示にする */
+    .mode-radio-marker, .theme-radio-marker {{
+        display: none !important;
+    }}
+
+    /* -------------------------------------------------------------
+     * ★ ② 名刺テーマ選択コンテナ（幅700px・横1行固定・白枠）
+     * ------------------------------------------------------------- */
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.theme-radio-marker) {{
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 12px !important;
+        padding: 1rem 1.25rem !important;
+        margin: 1rem auto 1.5rem auto !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+        max-width: 700px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }}
+
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.theme-radio-marker) div[data-testid="stRadio"] {{
+        background: transparent !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        width: 100% !important;
+    }}
+
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.theme-radio-marker) div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: nowrap !important;
+        flex-wrap: nowrap !important; /* 横一列で絶対に折り返さない */
         justify-content: space-between !important;
         align-items: center !important;
-        gap: 0.5rem !important;
+        gap: 0.4rem !important;
         width: 100% !important;
         overflow-x: auto !important;
     }}
 
-    .direct-white-card div[role="radiogroup"] label {{
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(.theme-radio-marker) div[role="radiogroup"] label {{
         white-space: nowrap !important;
         flex-shrink: 0 !important;
     }}
@@ -613,7 +641,7 @@ def generate_nickname(comments):
             f"【{top1}の空に想いを馳せ{top2}の章を詠む英雄】",
             f"【{top1}の書庫に深く潜り{top2}の真理を極めし執筆者】",
             f"【{top1}の書巻を広げ{top2}の領域を統べる主】",
-            f"【{top1}を凍てつく筆下に込め{top2}を描く者】",
+            f"【{top1}を凍てつく筆先に込め{top2}を描く者】",
             f"【{top1}の図書室で静かに{top2}の解を導く英雄】",
             f"【{top1}を原稿用紙に走らせ{top2}を解き明かす覇王】",
             f"【{top1}を万年筆に宿し{top2}の歴史を紡ぐ主】",
@@ -884,7 +912,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         font_footer,
         text_sub,
         outline_color=outline_c,
-        outline_range=0,
+        outline_0=0,
     )
 
     final_img = Image.alpha_composite(img, overlay).convert("RGB")
@@ -903,13 +931,19 @@ input_name = st.text_input(
     placeholder="@ユーザー名を入力",
 )
 
-st.markdown('<div class="analysis-mode-box">', unsafe_allow_html=True)
-mode = st.radio(
-    "解析モードを選択してください",
-    options=["⚡ 爆速モード（直近〜500件程度）", "🐢 じっくり解析モード（直近〜3000件程度）"],
-    index=0,
-)
-st.markdown("</div>", unsafe_allow_html=True)
+# ★ 解析モード選択（公式コンテナで綺麗な白枠＆左寄せ）
+with st.container(border=True):
+    st.markdown(
+        '<div class="mode-radio-marker"></div>', unsafe_allow_html=True
+    )
+    mode = st.radio(
+        "解析モードを選択してください",
+        options=[
+            "⚡ 爆速モード（直近〜500件程度）",
+            "🐢 じっくり解析モード（直近〜3000件程度）",
+        ],
+        index=0,
+    )
 
 generate_btn = st.button("称号を獲得する！", type="primary")
 
@@ -998,39 +1032,24 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
-    # ★ 確実に不透明な白背景・角丸・影が適用されるインラインスタイル枠でラジオボタンを包む
-    st.markdown(
-        """
-        <div class="direct-white-card" style="
-            background-color: rgba(255, 255, 255, 0.96) !important;
-            border: 1px solid #cbd5e1 !important;
-            border-radius: 12px !important;
-            padding: 1rem 1.25rem !important;
-            margin: 1rem auto 1.5rem auto !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
-            max-width: 700px !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-        ">
-    """,
-        unsafe_allow_html=True,
-    )
-
-    selected_theme = st.radio(
-        "名刺カードのデザインテーマを選択してください",
-        options=[
-            "おまさい",
-            "うつろ①",
-            "うつろ②",
-            "うつろ③",
-            "うつろ④",
-            "うつろ⑤",
-        ],
-        index=0,
-        horizontal=True,
-    )
-
-    st.markdown("</div>", unsafe_allow_html=True)
+    # ★ 名刺テーマ選択（公式コンテナで綺麗な白枠＆横1行）
+    with st.container(border=True):
+        st.markdown(
+            '<div class="theme-radio-marker"></div>', unsafe_allow_html=True
+        )
+        selected_theme = st.radio(
+            "名刺カードのデザインテーマを選択してください",
+            options=[
+                "おまさい",
+                "うつろ①",
+                "うつろ②",
+                "うつろ③",
+                "うつろ④",
+                "うつろ⑤",
+            ],
+            index=0,
+            horizontal=True,
+        )
 
     img_bytes = create_card_image(
         target_author, title, top_words, theme=selected_theme
