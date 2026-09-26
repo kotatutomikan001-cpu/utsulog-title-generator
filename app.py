@@ -131,7 +131,6 @@ def set_bg_image():
 
     /* ★ コンテナ要素ごとの中央揃え指定 */
     div.element-container:has(div[data-testid="stTextInput"]),
-    div.element-container:has(div[data-testid="stRadio"]),
     div.element-container:has(div[data-testid="stButton"]) {{
         display: flex !important;
         justify-content: center !important;
@@ -153,7 +152,7 @@ def set_bg_image():
         box-sizing: border-box !important;
     }}
 
-    /* 上部解析モード用ボックス（440px） */
+    /* 上部解析モード用ボックス（440px・白背景・左寄せ） */
     .analysis-mode-box div[data-testid="stRadio"] {{
         background-color: rgba(255, 255, 255, 0.95) !important;
         padding: 1rem 1.25rem !important;
@@ -167,6 +166,14 @@ def set_bg_image():
         box-sizing: border-box !important;
     }}
 
+    .analysis-mode-box div[data-testid="stRadio"] div[role="radiogroup"] {{
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        gap: 0.5rem !important;
+    }}
+
     /* フォーム枠内文字色（黒・ネイビー固定） */
     div[data-testid="stTextInput"] label, 
     div[data-testid="stRadio"] label, 
@@ -176,47 +183,38 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
-    /* 上部解析モード選択肢：左寄せ */
-    .analysis-mode-box div[data-testid="stRadio"] div[role="radiogroup"] {{
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        justify-content: flex-start !important;
-        gap: 0.5rem !important;
-    }}
-
-    /* ★★★ 名刺テーマコンテナ用CSS（白背景＋角丸＋影＆横1行固定） ★★★ */
-    div[data-testid="stContainer"]:has(.theme-radio-marker) {{
-        background-color: rgba(255, 255, 255, 0.95) !important;
-        border: none !important;
-        border-radius: 12px !important;
+    /* ★★★ st.container(border=True) の白枠・背景色・レイアウト強制適用 ★★★ */
+    [data-testid="stVerticalBlockBorderWrapper"] {{
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 16px !important;
         padding: 1rem 1.25rem !important;
-        margin-bottom: 1.5rem !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
+        margin: 1rem auto 1.5rem auto !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+        max-width: 720px !important;
         width: 100% !important;
-        max-width: 700px !important;
     }}
 
-    div[data-testid="stContainer"]:has(.theme-radio-marker) div[data-testid="stRadio"] {{
-        background: transparent !important;
+    [data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stRadio"] {{
+        background-color: transparent !important;
         padding: 0 !important;
         box-shadow: none !important;
         max-width: 100% !important;
         width: 100% !important;
     }}
 
-    div[data-testid="stContainer"]:has(.theme-radio-marker) div[role="radiogroup"] {{
+    [data-testid="stVerticalBlockBorderWrapper"] div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: nowrap !important;
+        flex-wrap: nowrap !important; /* 横1行で折り返さない */
         justify-content: space-between !important;
         align-items: center !important;
-        gap: 0.3rem !important;
+        gap: 0.5rem !important;
         width: 100% !important;
         overflow-x: auto !important;
     }}
 
-    div[data-testid="stContainer"]:has(.theme-radio-marker) div[role="radiogroup"] label {{
+    [data-testid="stVerticalBlockBorderWrapper"] div[role="radiogroup"] label {{
         white-space: nowrap !important;
         flex-shrink: 0 !important;
     }}
@@ -1012,11 +1010,8 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
-    # ★ st.container(border=True) を利用して確実に白いカード枠で囲む
+    # ★ 強制白背景コンテナでデザインテーマを包む
     with st.container(border=True):
-        st.markdown(
-            '<div class="theme-radio-marker"></div>', unsafe_allow_html=True
-        )
         selected_theme = st.radio(
             "名刺カードのデザインテーマを選択してください",
             options=[
