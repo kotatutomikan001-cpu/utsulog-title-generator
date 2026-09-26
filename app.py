@@ -138,7 +138,7 @@ def set_bg_image():
         width: 100% !important;
     }}
 
-    /* ★ 入力枠・解析モード・ボタンの幅を440pxで統一 */
+    /* ★ 入力枠・解析モード・ボタンの基本デザイン（幅440px） */
     div[data-testid="stTextInput"], 
     div[data-testid="stRadio"], 
     div[data-testid="stButton"] {{
@@ -163,23 +163,26 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
-    /* 解析モード選択肢のレイアウト */
-    div[data-testid="stRadio"] div[role="radiogroup"] {{
+    /* ★ 上部解析モード選択肢は「左寄せ（非センタリング）」で配置 */
+    .analysis-mode-box div[data-testid="stRadio"] div[role="radiogroup"] {{
         display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: wrap !important;
-        justify-content: space-around !important;
-        align-items: center !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
         gap: 0.5rem !important;
     }}
 
-    /* ★ 名刺テーマ選択（後半のstRadio）は横幅をしっかり確保して1行固定にする */
+    /* ★ 名刺テーマ選択肢は「横幅を広く確保して絶対1行」にする */
     .theme-select-box div[data-testid="stRadio"] {{
         max-width: 680px !important;
     }}
     .theme-select-box div[role="radiogroup"] {{
+        display: flex !important;
+        flex-direction: row !important;
         flex-wrap: nowrap !important;
         justify-content: space-between !important;
+        align-items: center !important;
+        gap: 0.2rem !important;
     }}
 
     div[data-testid="stTextInput"] input {{
@@ -588,7 +591,7 @@ def generate_nickname(comments):
             f"【{top1}の空に想いを馳せ{top2}の章を詠む英雄】",
             f"【{top1}の書庫に深く潜り{top2}の真理を極めし執筆者】",
             f"【{top1}の書巻を広げ{top2}の領域を統べる主】",
-            f"【{top1}を凍てつく筆先に込め{top2}を描く者】",
+            f"【{top1}を凍てつく筆下に込め{top2}を描く者】",
             f"【{top1}の図書室で静かに{top2}の解を導く英雄】",
             f"【{top1}を原稿用紙に走らせ{top2}を解き明かす覇王】",
             f"【{top1}を万年筆に宿し{top2}の歴史を紡ぐ主】",
@@ -878,12 +881,13 @@ input_name = st.text_input(
     placeholder="@ユーザー名を入力",
 )
 
+st.markdown('<div class="analysis-mode-box">', unsafe_allow_html=True)
 mode = st.radio(
     "解析モードを選択してください",
     options=["⚡ 爆速モード（直近〜500件程度）", "🐢 じっくり解析モード（直近〜3000件程度）"],
     index=0,
-    horizontal=True,
 )
+st.markdown("</div>", unsafe_allow_html=True)
 
 generate_btn = st.button("称号を獲得する！", type="primary")
 
@@ -972,7 +976,7 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
-    # ★ テーマ選択のみ横幅制限を広げて横一列に綺麗に収める
+    # ★ テーマ選択のみ横幅制限を680pxまで広げて横1行に綺麗に収める
     st.markdown('<div class="theme-select-box">', unsafe_allow_html=True)
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
