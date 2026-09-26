@@ -904,7 +904,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         )
         y_pos += 42
 
-    # 6. フッター
+    # 6. フッター (タイポ修正済み)
     draw_text_with_outline(
         draw,
         (50, 490),
@@ -912,7 +912,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         font_footer,
         text_sub,
         outline_color=outline_c,
-        outline_0=0,
+        outline_range=0,
     )
 
     final_img = Image.alpha_composite(img, overlay).convert("RGB")
