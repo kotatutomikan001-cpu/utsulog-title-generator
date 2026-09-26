@@ -282,7 +282,7 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数
+# 3. 称号生成関数（「すか」除外対応）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
@@ -330,6 +330,7 @@ def generate_nickname(comments):
     ]
 
     stop_words = {
+        "すか",  # ← 「すか」を除外リストに追加
         "こと",
         "よう",
         "そう",
@@ -569,12 +570,11 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（うつろ①〜⑤表記対応版）
+# ★ テーマ別名刺画像生成関数
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
 
-    # 1. テーマに応じたファイル名の検索（「うつろ①〜⑤」対応）
     specific_bg_file = None
 
     if theme == "おまさい":
@@ -597,18 +597,15 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
             specific_bg_file = cand
             break
 
-    # 背景PNG画像の読み込み
     if specific_bg_file:
         img = Image.open(specific_bg_file).convert("RGBA")
         img = img.resize((width, height))
     else:
         img = Image.new("RGBA", (width, height), color=(240, 248, 255, 255))
 
-    # 合成用オーバーレイ
     overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
 
-    # 2. 配色設定（「おまさい」は明るい背景になじむ薄い白ベタ敷き＋ネイビー文字）
     if theme == "おまさい":
         card_base_bg = Image.new("RGBA", (width, height), (255, 255, 255, 160))
         img = Image.alpha_composite(img, card_base_bg)
@@ -616,7 +613,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         border_outer = (51, 65, 85, 220)
         border_inner = (148, 163, 184, 220)
 
-        title_box_bg = (30, 41, 59, 230)  # 称号枠だけネイビー
+        title_box_bg = (30, 41, 59, 230)
         title_box_border = (51, 65, 85, 255)
 
         text_dark = (15, 23, 42)
@@ -625,20 +622,18 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         outline_c = None
         outline_r = 0
     else:
-        # うつろ①〜⑤用の設定
         border_outer = (51, 65, 85, 200)
         border_inner = (148, 163, 184, 200)
 
-        title_box_bg = (255, 255, 255, 190)  # 薄い半透明白枠
+        title_box_bg = (255, 255, 255, 190)
         title_box_border = (203, 213, 225, 220)
 
         text_dark = (15, 23, 42)
         text_sub = (71, 85, 105)
         red_accent = (225, 29, 72)
-        outline_c = (255, 255, 255)  # 白い柔らかい縁取り
+        outline_c = (255, 255, 255)
         outline_r = 2
 
-    # 外枠フレーム
     draw.rectangle(
         [20, 20, width - 20, height - 20], outline=border_outer, width=3
     )
@@ -660,7 +655,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
             font_rank_item
         ) = font_footer = ImageFont.load_default()
 
-    # 1. ヘッダー
     draw_text_with_outline(
         draw,
         (50, 45),
@@ -671,7 +665,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         outline_range=outline_r,
     )
 
-    # 2. 投稿者名
     draw_text_with_outline(
         draw,
         (50, 85),
@@ -682,7 +675,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         outline_range=outline_r,
     )
 
-    # 3. 称号枠
     draw.rectangle(
         [50, 145, width - 50, 235],
         fill=title_box_bg,
@@ -690,7 +682,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         width=2,
     )
 
-    # 称号テキスト
     title_text_color = (
         (255, 255, 255) if theme == "おまさい" else red_accent
     )
@@ -698,7 +689,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         draw, (70, 170), title, font_title, title_text_color, outline_range=0
     )
 
-    # 4. ランキング見出し
     draw_text_with_outline(
         draw,
         (50, 265),
@@ -709,7 +699,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         outline_range=outline_r,
     )
 
-    # 5. ランキング項目
     y_pos = 310
     current_rank = 1
     for idx, (word, count) in enumerate(top_words[:3]):
@@ -730,7 +719,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         )
         y_pos += 42
 
-    # 6. フッター
     draw_text_with_outline(
         draw,
         (50, 490),
@@ -741,7 +729,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         outline_range=0,
     )
 
-    # 画像レイヤーの合成
     final_img = Image.alpha_composite(img, overlay).convert("RGB")
 
     buf = io.BytesIO()
@@ -834,7 +821,6 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
-    # テーマ選択肢を「うつろ①〜⑤」へ更新
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
         options=[
