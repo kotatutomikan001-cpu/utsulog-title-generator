@@ -893,17 +893,8 @@ if "title" in st.session_state:
         )
 
     with btn_col2:
-        app_url = "https://utsulog-title-generator.streamlit.app"
-        try:
-            if hasattr(st, "context") and hasattr(st.context, "headers"):
-                host = st.context.headers.get("host", "")
-                if host:
-                    app_url = f"https://{host}"
-        except Exception:
-            pass
-
-        # URL末尾のパラメータを ?v=3 に更新してXに最新画面を読み込ませる
-        share_app_url = f"{app_url}?v=3"
+        # ★ 静的な OGP を持つ GitHub Pages の URL をシェア用に指定
+        share_app_url = "https://kotatutomikan001-cpu.github.io/utsulog-title-generator/"
 
         raw_tweet_text = (
             f"{target_author} の獲得称号は…\n\n"
