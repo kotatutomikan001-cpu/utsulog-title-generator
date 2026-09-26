@@ -129,28 +129,26 @@ def set_bg_image():
         margin-top: 0.8rem !important;
     }}
 
-    /* ★ コンテナ要素ごとの中央揃え強制指定 */
+    /* ★ コンテナ要素ごとの中央揃え指定 */
     div.element-container:has(div[data-testid="stTextInput"]),
     div.element-container:has(div[data-testid="stRadio"]),
-    div.element-container:has(div[data-testid="stButton"]),
-    div.element-container:has(div[data-testid="stAlert"]) {{
+    div.element-container:has(div[data-testid="stButton"]) {{
         display: flex !important;
         justify-content: center !important;
         width: 100% !important;
     }}
 
-    /* ★ すべての白枠（入力枠・解析モード・ボタン・緑枠）の幅と位置を完全一致 */
+    /* ★ 入力枠・解析モード・ボタンの幅と位置を440pxで完全一致 */
     div[data-testid="stTextInput"], 
     div[data-testid="stRadio"], 
-    div[data-testid="stButton"],
-    div[data-testid="stAlert"] {{
+    div[data-testid="stButton"] {{
         background-color: rgba(255, 255, 255, 0.95) !important;
         padding: 1rem 1.25rem !important;
         border-radius: 12px !important;
         margin-left: auto !important;
         margin-right: auto !important;
         margin-bottom: 1rem !important;
-        max-width: 440px !important; /* 幅を全要素でピッタリ統一 */
+        max-width: 440px !important;
         width: 100% !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
         box-sizing: border-box !important;
@@ -196,32 +194,21 @@ def set_bg_image():
         background-color: #be123c !important;
     }}
 
-    /* ★ 解析完了（緑枠）内部の文字位置を上下・左右完全中央に調整 */
-    div[data-testid="stAlert"] {{
+    /* ★ 解析完了の独自メッセージカード（崩れない絶対指定） */
+    .custom-success-box {{
         background-color: rgba(240, 253, 244, 0.95) !important;
-        border: 1px solid #bbf7d0 !important;
-        padding: 0.75rem 1.25rem !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }}
-
-    div[data-testid="stAlert"] [data-testid="stAlertContent"] {{
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        width: 100% !important;
-    }}
-
-    div[data-testid="stAlert"] p {{
+        border: 1px solid #86efac !important;
         color: #166534 !important;
+        font-weight: bold !important;
+        font-size: 1rem !important;
+        padding: 0.8rem 1.25rem !important;
+        border-radius: 12px !important;
+        max-width: 440px !important;
+        width: 100% !important;
+        margin: 0 auto 1.5rem auto !important;
         text-align: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        line-height: 1.2 !important;
-        font-weight: 600 !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
+        box-sizing: border-box !important;
     }}
     
     /* Xシェア用カスタムリンクボタン */
@@ -696,7 +683,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         border_outer = (51, 65, 85, 220)
         border_inner = (148, 163, 184, 220)
 
-        # 薄い水色のまま透過処理（アルファ値 230 → 140）
         title_box_bg = (224, 242, 254, 140)
         title_box_border = (186, 230, 253, 200)
 
@@ -928,7 +914,11 @@ if "title" in st.session_state:
     title = st.session_state["title"]
     top_words = st.session_state["top_words"]
 
-    st.success("解析完了！")
+    # ★ 崩れない自前スタイルの「解析完了！」表示
+    st.markdown(
+        '<div class="custom-success-box">✅ 解析完了！</div>',
+        unsafe_allow_html=True,
+    )
 
     st.markdown("---")
     st.subheader(f"🏷️ `{target_author}` の獲得称号")
