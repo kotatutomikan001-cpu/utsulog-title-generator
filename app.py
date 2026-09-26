@@ -10,7 +10,6 @@ from janome.tokenizer import Tokenizer
 from PIL import Image, ImageDraw, ImageFont
 from playwright.sync_api import sync_playwright
 import streamlit as st
-import streamlit.components.v1 as components
 
 # -------------------------------------------------------------
 # 1. 画面デザイン・タイトルの設定
@@ -19,47 +18,6 @@ st.set_page_config(
     page_title="うつログ（うつろ書架）の称号診断",
     page_icon="❄️",
     layout="centered",
-)
-
-# -------------------------------------------------------------
-# ★ OGP（SNSシェア時のカード画像・メタ情報）の設定
-# -------------------------------------------------------------
-ogp_image_url = "https://raw.githubusercontent.com/kotatutomikan001-cpu/utsulog-title-generator/main/ogp.png"
-app_base_url = "https://utsulog-title-generator-5vutqglq3okeo3worwzxhs.streamlit.app"
-
-# JavaScriptを使って<head>タグへメタタグを直接注入する（ライブラリ不要）
-components.html(
-    f"""
-    <script>
-    const parentHead = window.parent.document.head;
-    
-    const metaTags = [
-        {{ property: 'og:type', content: 'website' }},
-        {{ property: 'og:url', content: '{app_base_url}' }},
-        {{ property: 'og:title', content: 'うつログ（うつろ書架）の称号診断' }},
-        {{ property: 'og:description', content: 'うつログの過去コメントからあなたの称号を診断！' }},
-        {{ property: 'og:image', content: '{ogp_image_url}' }},
-        {{ name: 'twitter:card', content: 'summary_large_image' }},
-        {{ name: 'twitter:url', content: '{app_base_url}' }},
-        {{ name: 'twitter:title', content: 'うつログ（うつろ書架）の称号診断' }},
-        {{ name: 'twitter:description', content: 'うつログの過去コメントからあなたの称号を診断！' }},
-        {{ name: 'twitter:image', content: '{ogp_image_url}' }}
-    ];
-
-    metaTags.forEach(data => {{
-        let meta = parentHead.querySelector(data.property ? `meta[property="${{data.property}}"]` : `meta[name="${{data.name}}"]`);
-        if (!meta) {{
-            meta = window.parent.document.createElement('meta');
-            if (data.property) meta.setAttribute('property', data.property);
-            if (data.name) meta.setAttribute('name', data.name);
-            parentHead.appendChild(meta);
-        }}
-        meta.setAttribute('content', data.content);
-    }});
-    </script>
-    """,
-    height=0,
-    width=0,
 )
 
 
@@ -944,8 +902,8 @@ if "title" in st.session_state:
         except Exception:
             pass
 
-        # URLの末尾に ?v=2 を付与してXのキャッシュを破棄させる
-        share_app_url = f"{app_url}?v=2"
+        # URL末尾のパラメータを ?v=3 に更新してXに最新画面を読み込ませる
+        share_app_url = f"{app_url}?v=3"
 
         raw_tweet_text = (
             f"{target_author} の獲得称号は…\n\n"
