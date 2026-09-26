@@ -880,10 +880,11 @@ if "title" in st.session_state:
         except Exception:
             pass
 
+        # 「うつろ書架（うつログ）の称号診断」に変更
         raw_tweet_text = (
             f"{target_author} の獲得称号は…\n\n"
             f"✨ {title} ✨\n\n"
-            f"👇 うつろ書架の称号診断はこちら！\n"
+            f"👇 うつろ書架（うつログ）の称号診断はこちら！\n"
             f"{app_url}\n\n"
             f"※保存した名刺画像を添えてポストしてね！\n"
             f"#うつろ書架の称号診断 #うつログ #氷室うつろ"
