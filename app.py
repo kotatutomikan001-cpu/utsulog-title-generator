@@ -10,7 +10,7 @@ from janome.tokenizer import Tokenizer
 from PIL import Image, ImageDraw, ImageFont
 from playwright.sync_api import sync_playwright
 import streamlit as st
-import streamlit_head as head
+import streamlit.components.v1 as components
 
 # -------------------------------------------------------------
 # 1. 画面デザイン・タイトルの設定
@@ -27,22 +27,39 @@ st.set_page_config(
 ogp_image_url = "https://raw.githubusercontent.com/kotatutomikan001-cpu/utsulog-title-generator/main/ogp.png"
 app_base_url = "https://utsulog-title-generator-5vutqglq3okeo3worwzxhs.streamlit.app"
 
-head.head(
+# JavaScriptを使って<head>タグへメタタグを直接注入する（ライブラリ不要）
+components.html(
     f"""
-    <!-- Open Graph / Facebook / LINE -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{app_base_url}">
-    <meta property="og:title" content="うつログ（うつろ書架）の称号診断">
-    <meta property="og:description" content="うつログの過去コメントからあなたの称号を診断！">
-    <meta property="og:image" content="{ogp_image_url}">
+    <script>
+    const parentHead = window.parent.document.head;
+    
+    const metaTags = [
+        {{ property: 'og:type', content: 'website' }},
+        {{ property: 'og:url', content: '{app_base_url}' }},
+        {{ property: 'og:title', content: 'うつログ（うつろ書架）の称号診断' }},
+        {{ property: 'og:description', content: 'うつログの過去コメントからあなたの称号を診断！' }},
+        {{ property: 'og:image', content: '{ogp_image_url}' }},
+        {{ name: 'twitter:card', content: 'summary_large_image' }},
+        {{ name: 'twitter:url', content: '{app_base_url}' }},
+        {{ name: 'twitter:title', content: 'うつログ（うつろ書架）の称号診断' }},
+        {{ name: 'twitter:description', content: 'うつログの過去コメントからあなたの称号を診断！' }},
+        {{ name: 'twitter:image', content: '{ogp_image_url}' }}
+    ];
 
-    <!-- Twitter / X -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="{app_base_url}">
-    <meta name="twitter:title" content="うつログ（うつろ書架）の称号診断">
-    <meta name="twitter:description" content="うつログの過去コメントからあなたの称号を診断！">
-    <meta name="twitter:image" content="{ogp_image_url}">
-    """
+    metaTags.forEach(data => {{
+        let meta = parentHead.querySelector(data.property ? `meta[property="${{data.property}}"]` : `meta[name="${{data.name}}"]`);
+        if (!meta) {{
+            meta = window.parent.document.createElement('meta');
+            if (data.property) meta.setAttribute('property', data.property);
+            if (data.name) meta.setAttribute('name', data.name);
+            parentHead.appendChild(meta);
+        }}
+        meta.setAttribute('content', data.content);
+    }});
+    </script>
+    """,
+    height=0,
+    width=0,
 )
 
 
