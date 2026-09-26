@@ -572,7 +572,7 @@ def draw_text_with_outline(
     fill_color,
     outline_color=None,
     outline_range=0,
-　　**kwargs,
+    **kwargs,
 ):
     x, y = position
     if outline_range > 0 and outline_color:
