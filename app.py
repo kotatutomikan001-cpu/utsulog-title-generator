@@ -77,9 +77,9 @@ def set_bg_image():
         background-color: rgba(0,0,0,0) !important;
     }}
     
-    /* メインエリア幅 */
+    /* メインエリア幅（PC表示でも狭くならないよう元通り設定） */
     .main .block-container {{
-        max-width: 720px !important;
+        max-width: 800px !important;
         padding-top: 2rem !important;
     }}
 
@@ -130,17 +130,17 @@ def set_bg_image():
         margin-top: 0.8rem !important;
     }}
 
-    /* 下のフォーム枠（白背景固定・枠自体のセンタリング配置） */
+    /* 下のフォーム枠（白背景固定・崩れ防止） */
     div[data-testid="stTextInput"], div[data-testid="stRadio"], div[data-testid="stButton"] {{
         background-color: rgba(255, 255, 255, 0.92) !important;
         padding: 1rem 1.25rem !important;
         border-radius: 12px !important;
-        margin: 0 auto 1rem auto !important; /* 枠自体を画面中央に配置 */
-        max-width: 500px !important; /* 幅を揃える */
+        margin-bottom: 1rem !important;
+        width: 100% !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
     }}
 
-    /* フォーム枠内文字色（黒・ネイビー固定） */
+    /* フォーム枠内文字色 */
     div[data-testid="stTextInput"] label, 
     div[data-testid="stRadio"] label, 
     div[data-testid="stRadio"] p,
@@ -149,10 +149,7 @@ def set_bg_image():
         font-weight: 600 !important;
     }}
 
-    /* 解析モード（ラジオボタン）枠内は左寄せに指定 */
-    div[data-testid="stRadio"] {{
-        text-align: left !important;
-    }}
+    /* 解析モード（ラジオボタン）のレイアウト修正 */
     div[data-testid="stRadio"] > label {{
         display: block !important;
         text-align: left !important;
@@ -162,7 +159,6 @@ def set_bg_image():
         display: flex !important;
         flex-direction: column !important;
         align-items: flex-start !important;
-        justify-content: flex-start !important;
     }}
 
     /* テキスト入力枠 */
@@ -193,6 +189,18 @@ def set_bg_image():
 
     .custom-section-header span {{
         display: inline-block !important;
+    }}
+
+    /* WEB上の称号文字表示（途切れ防止・レスポンシブ縮小） */
+    .web-title-display {{
+        text-align: center !important;
+        font-size: clamp(0.95rem, 3.2vw, 1.8rem) !important;
+        font-weight: bold !important;
+        color: #e11d48 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        padding: 0.5rem 0 !important;
+        line-height: 1.4 !important;
     }}
 
     /* Xシェア用カスタムリンクボタン */
@@ -914,7 +922,7 @@ if "title" in st.session_state:
 
     st.markdown("---")
 
-    # 1. 投稿者名＆「獲得称号」見出し（中央揃え・変な文字での改行を防止）
+    # 1. 投稿者名＆「獲得称号」見出し
     st.markdown(
         f"""
         <div class="custom-section-header" style="font-size: 1.25rem; margin-bottom: 0.8rem; text-align: center;">
@@ -924,10 +932,10 @@ if "title" in st.session_state:
         unsafe_allow_html=True,
     )
 
-    # 2. 獲得称号テキスト表示（折り返し防止・自動サイズ縮小）
+    # 2. 獲得称号テキスト表示（WEB画面上で長文称号が途切れず全文表示されるよう補正）
     st.markdown(
         f"""
-        <div style="text-align: center; font-size: clamp(1.0rem, 4.5vw, 1.8rem); font-weight: bold; color: #e11d48; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0.5rem 0;">
+        <div class="web-title-display">
             {title}
         </div>
         """,
@@ -935,7 +943,7 @@ if "title" in st.session_state:
     )
     st.markdown("---")
 
-    # 3. 「特徴的な名詞ランキング」見出し（中央揃え・不自然な文字位置での改行を防止）
+    # 3. 「特徴的な名詞ランキング」見出し
     st.markdown(
         """
         <div class="custom-section-header" style="font-size: 1.2rem; margin-bottom: 0.8rem; text-align: center;">
