@@ -196,15 +196,32 @@ def set_bg_image():
         background-color: #be123c !important;
     }}
 
-    /* 解析完了（緑枠）内部の文字色と背景 */
+    /* ★ 解析完了（緑枠）内部の文字位置を上下・左右完全中央に調整 */
     div[data-testid="stAlert"] {{
         background-color: rgba(240, 253, 244, 0.95) !important;
         border: 1px solid #bbf7d0 !important;
+        padding: 0.75rem 1.25rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }}
+
+    div[data-testid="stAlert"] [data-testid="stAlertContent"] {{
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }}
+
     div[data-testid="stAlert"] p {{
         color: #166534 !important;
         text-align: center !important;
         margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1.2 !important;
+        font-weight: 600 !important;
     }}
     
     /* Xシェア用カスタムリンクボタン */
