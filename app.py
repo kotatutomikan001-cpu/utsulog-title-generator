@@ -131,7 +131,9 @@ def set_bg_image():
 
     /* ★ コンテナ要素ごとの中央揃え指定 */
     div.element-container:has(div[data-testid="stTextInput"]),
-    div.element-container:has(div[data-testid="stButton"]) {{
+    div.element-container:has(div[data-testid="stButton"]),
+    div.element-container:has(div.mode-radio-wrap),
+    div.element-container:has(div.theme-radio-wrap) {{
         display: flex !important;
         justify-content: center !important;
         width: 100% !important;
@@ -162,27 +164,23 @@ def set_bg_image():
     }}
 
     /* -------------------------------------------------------------
-     * ★ ① 解析モード選択（幅440px・完全な白背景・縦並び）
+     * ★ ① 解析モード選択（幅440px・白背景・角丸・影・縦並び）
      * ------------------------------------------------------------- */
-    div.element-container:has(.mode-marker) {{
-        display: flex !important;
-        justify-content: center !important;
-        width: 100% !important;
-    }}
-
-    div.element-container:has(.mode-marker) div[data-testid="stRadio"] {{
+    div.mode-radio-wrap div[data-testid="stRadio"] {{
         background-color: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 12px !important;
         padding: 1rem 1.25rem !important;
-        margin: 0 auto 1rem auto !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        margin-bottom: 1rem !important;
         max-width: 440px !important;
         width: 100% !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
         box-sizing: border-box !important;
     }}
 
-    div.element-container:has(.mode-marker) div[role="radiogroup"] {{
+    div.mode-radio-wrap div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: column !important;
         align-items: flex-start !important;
@@ -191,27 +189,23 @@ def set_bg_image():
     }}
 
     /* -------------------------------------------------------------
-     * ★ ② 名刺テーマ選択（幅700px・完全な白背景・横1行固定）
+     * ★ ② 名刺テーマ選択（幅700px・白背景・角丸・影・横1行固定）
      * ------------------------------------------------------------- */
-    div.element-container:has(.theme-marker) {{
-        display: flex !important;
-        justify-content: center !important;
-        width: 100% !important;
-    }}
-
-    div.element-container:has(.theme-marker) div[data-testid="stRadio"] {{
+    div.theme-radio-wrap div[data-testid="stRadio"] {{
         background-color: #ffffff !important;
         border: 1px solid #cbd5e1 !important;
         border-radius: 12px !important;
         padding: 1rem 1.25rem !important;
-        margin: 1rem auto 1.5rem auto !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        margin-bottom: 1.5rem !important;
         max-width: 700px !important;
         width: 100% !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
         box-sizing: border-box !important;
     }}
 
-    div.element-container:has(.theme-marker) div[role="radiogroup"] {{
+    div.theme-radio-wrap div[role="radiogroup"] {{
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
@@ -222,13 +216,9 @@ def set_bg_image():
         overflow-x: auto !important;
     }}
 
-    div.element-container:has(.theme-marker) div[role="radiogroup"] label {{
+    div.theme-radio-wrap div[role="radiogroup"] label {{
         white-space: nowrap !important;
         flex-shrink: 0 !important;
-    }}
-
-    .mode-marker, .theme-marker {{
-        display: none !important;
     }}
 
     div[data-testid="stTextInput"] input {{
@@ -927,8 +917,8 @@ input_name = st.text_input(
     placeholder="@ユーザー名を入力",
 )
 
-# ★ 解析モード選択（マーカーを付与してCSSで直接白背景カード化）
-st.markdown('<div class="mode-marker"></div>', unsafe_allow_html=True)
+# ★ 解析モード選択（ラッパーで包み込んでCSSで完全同期）
+st.markdown('<div class="mode-radio-wrap">', unsafe_allow_html=True)
 mode = st.radio(
     "解析モードを選択してください",
     options=[
@@ -937,6 +927,7 @@ mode = st.radio(
     ],
     index=0,
 )
+st.markdown("</div>", unsafe_allow_html=True)
 
 generate_btn = st.button("称号を獲得する！", type="primary")
 
@@ -1025,8 +1016,8 @@ if "title" in st.session_state:
 
     st.subheader("🎴 獲得称号名刺")
 
-    # ★ 名刺テーマ選択（マーカーを付与してCSSで直接白背景カード化・横1行）
-    st.markdown('<div class="theme-marker"></div>', unsafe_allow_html=True)
+    # ★ 名刺テーマ選択（ラッパーで包み込んでCSSで完全同期・横1行）
+    st.markdown('<div class="theme-radio-wrap">', unsafe_allow_html=True)
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
         options=[
@@ -1040,6 +1031,7 @@ if "title" in st.session_state:
         index=0,
         horizontal=True,
     )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     img_bytes = create_card_image(
         target_author, title, top_words, theme=selected_theme
