@@ -520,7 +520,7 @@ def generate_nickname(comments):
             f"【{top1}の空に想いを馳せ{top2}の章を詠む英雄】",
             f"【{top1}の書庫に深く潜り{top2}の真理を極めし執筆者】",
             f"【{top1}の書巻を広げ{top2}の領域を統べる主】",
-            f"【{top1}を凍てつく筆先に込め{top2}を描く者】",
+            f"【{top1}を凍てつく筆下に込め{top2}を描く者】",
             f"【{top1}の図書室で静かに{top2}の解を導く英雄】",
             f"【{top1}を原稿用紙に走らせ{top2}を解き明かす覇王】",
             f"【{top1}を万年筆に宿し{top2}の歴史を紡ぐ主】",
@@ -869,10 +869,20 @@ if "title" in st.session_state:
     st.markdown("---")
     st.subheader(f"🏷️ `{target_author}` の獲得称号")
 
-    # 称号が画面上で途切れないよう動的にサイズ補正（HTML標準スタイル）
+    # 称号が文字数に応じて自動的にフォントサイズ補正され、1行に収まるスタイリング
+    title_len = max(len(title), 1)
     st.markdown(
         f"""
-        <div style="font-size: clamp(1.1rem, 3.5vw, 1.8rem); font-weight: bold; color: #e11d48; margin: 0.5rem 0;">
+        <div style="
+            text-align: center;
+            font-size: min(1.8rem, calc(82vw / {title_len}));
+            font-weight: bold;
+            color: #e11d48;
+            white-space: nowrap;
+            overflow: visible;
+            margin: 0.8rem 0;
+            line-height: 1.2;
+        ">
             {title}
         </div>
         """,
