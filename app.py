@@ -80,7 +80,7 @@ def set_bg_image():
     
     /* メインエリア幅 */
     .main .block-container {{
-        max-width: 760px !important;
+        max-width: 800px !important;
         padding-top: 2rem !important;
     }}
 
@@ -140,29 +140,29 @@ def set_bg_image():
         width: 100% !important;
     }}
 
-    /* フォーム白枠（コンパクトな幅360px・完全センタリング配置） */
+    /* フォーム白枠（説明文が1行に収まる幅520pxに最適化＆完全センタリング） */
     div[data-testid="stTextInput"], 
     div[data-testid="stRadio"], 
     div[data-testid="stButton"] {{
         background-color: rgba(255, 255, 255, 0.95) !important;
-        padding: 0.9rem 1.1rem !important;
+        padding: 1rem 1.25rem !important;
         border-radius: 12px !important;
         margin-left: auto !important;
         margin-right: auto !important;
         margin-bottom: 1rem !important;
-        max-width: 360px !important; /* より小さくスマートな幅に設定 */
+        max-width: 520px !important; /* 説明文が2行にならないゆとりのある幅 */
         width: 100% !important;
         box-shadow: 0 4px 15px rgba(0,0,0,0.12) !important;
     }}
 
-    /* ダークモード対策：フォーム枠内の文字色・ラベル */
+    /* フォーム枠内文字色 */
     div[data-testid="stTextInput"] label, 
     div[data-testid="stRadio"] label, 
     div[data-testid="stRadio"] p,
-    div[role="radiogroup"] label span,
-    .stMarkdown, p, span, h1, h2, h3, h4 {{
+    div[role="radiogroup"] label span {{
         color: #0f172a !important;
-        font-weight: 600;
+        font-weight: 600 !important;
+        white-space: nowrap !important; /* ラベルの不自然な折れを防止 */
     }}
 
     /* 解析モード（ラジオボタン）枠内選択肢は左寄せ */
@@ -200,22 +200,41 @@ def set_bg_image():
         color: #ffffff !important;
         border: none !important;
         font-weight: bold !important;
-        padding: 0.5rem 1rem !important;
+        padding: 0.6rem 1rem !important;
         border-radius: 8px !important;
     }}
     div[data-testid="stButton"] button:hover {{
         background-color: #be123c !important;
     }}
 
-    /* ダークモード対策：成功・完了メッセージ枠 */
+    /* 成功・完了メッセージ枠 */
     div[data-testid="stAlert"] {{
         background-color: rgba(240, 253, 244, 0.95) !important;
         color: #166534 !important;
         border: 1px solid #bbf7d0 !important;
         border-radius: 10px !important;
+        max-width: 520px !important;
+        margin: 0 auto 1rem auto !important;
     }}
     div[data-testid="stAlert"] p {{
         color: #166534 !important;
+    }}
+
+    /* ★ 結果表示エリア用パネル（文字が背景画像に溶け込まないための白い可読性カード） */
+    .result-card-panel {{
+        background-color: rgba(255, 255, 255, 0.95) !important;
+        border-radius: 16px !important;
+        padding: 1.5rem 1.8rem !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+        margin-top: 1.5rem !important;
+        margin-bottom: 2rem !important;
+        color: #0f172a !important;
+    }}
+
+    .result-card-panel h3, 
+    .result-card-panel p, 
+    .result-card-panel div {{
+        color: #0f172a !important;
     }}
 
     /* 見出し類の不自然な改行を防ぐスタイル設定 */
@@ -232,16 +251,18 @@ def set_bg_image():
         display: inline-block !important;
     }}
 
-    /* WEB上の称号文字表示 */
+    /* WEB上の称号文字表示（ワイド幅＆1行迫力表示） */
     .web-title-display {{
         text-align: center !important;
-        font-size: clamp(1.0rem, 3.5vw, 1.8rem) !important;
+        font-size: clamp(1.1rem, 2.5vw, 1.8rem) !important;
         font-weight: bold !important;
         color: #e11d48 !important;
-        white-space: normal !important;
-        word-break: break-word !important;
-        padding: 0.5rem 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        padding: 0.8rem 0 !important;
         line-height: 1.4 !important;
+        width: 100% !important;
     }}
 
     /* Xシェア用カスタムリンクボタン */
@@ -959,7 +980,8 @@ if "title" in st.session_state:
 
     st.success("解析完了！")
 
-    st.markdown("---")
+    # 結果全体を保護する可読性向上白カードパネルを開始
+    st.markdown('<div class="result-card-panel">', unsafe_allow_html=True)
 
     # 1. 投稿者名＆「獲得称号」見出し
     st.markdown(
@@ -971,7 +993,7 @@ if "title" in st.session_state:
         unsafe_allow_html=True,
     )
 
-    # 2. 獲得称号テキスト表示
+    # 2. 獲得称号テキスト表示（途切れず横いっぱいに1行表示）
     st.markdown(
         f"""
         <div class="web-title-display">
@@ -1000,11 +1022,19 @@ if "title" in st.session_state:
             current_rank = idx + 1
             rank_label = f"第 {current_rank} 位"
 
-        st.write(f"**{rank_label}**: `{word}` （{count} 回出現）")
+        st.markdown(
+            f'<div style="color: #0f172a !important; font-weight: bold; margin-bottom: 0.3rem;">'
+            f'{rank_label}: <code style="color: #0369a1 !important; background: #e0f2fe !important; padding: 0.2rem 0.4rem; border-radius: 4px;">{word}</code> '
+            f'（{count} 回出現）</div>',
+            unsafe_allow_html=True,
+        )
 
     st.markdown("---")
 
-    st.subheader("🎴 獲得称号名刺")
+    st.markdown(
+        '<h3 style="color: #0f172a !important; font-weight: bold; font-size: 1.25rem; margin-top: 1rem;">🎴 獲得称号名刺</h3>',
+        unsafe_allow_html=True,
+    )
 
     selected_theme = st.radio(
         "名刺カードのデザインテーマを選択してください",
@@ -1066,3 +1096,6 @@ if "title" in st.session_state:
             f'<a href="{tweet_url}" target="_blank" class="x-share-btn" style="width: 100%; display: block; text-align: center;">𝕏 に称号をポストする</a>',
             unsafe_allow_html=True,
         )
+
+    # 結果全体パネルを閉じる
+    st.markdown("</div>", unsafe_allow_html=True)
