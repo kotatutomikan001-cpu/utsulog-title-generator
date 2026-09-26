@@ -584,7 +584,7 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（おまさい赤字統一版）
+# ★ テーマ別名刺画像生成関数（称号枠背景色統一版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -627,9 +627,6 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         border_outer = (51, 65, 85, 220)
         border_inner = (148, 163, 184, 220)
 
-        title_box_bg = (30, 41, 59, 230)
-        title_box_border = (51, 65, 85, 255)
-
         text_dark = (15, 23, 42)
         text_sub = (71, 85, 105)
         red_accent = (244, 63, 94)
@@ -642,14 +639,15 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         border_outer = (51, 65, 85, 200)
         border_inner = (148, 163, 184, 200)
 
-        title_box_bg = (255, 255, 255, 210)
-        title_box_border = (203, 213, 225, 220)
-
         text_dark = (15, 23, 42)
         text_sub = (51, 65, 85)
         red_accent = (225, 29, 72)
         outline_c = (255, 255, 255)
         outline_r = 2
+
+    # 称号枠の背景色・枠線を全テーマで統一（半透明白・ライトグレー枠線）
+    title_box_bg = (255, 255, 255, 210)
+    title_box_border = (203, 213, 225, 220)
 
     draw.rectangle(
         [20, 20, width - 20, height - 20], outline=border_outer, width=3
@@ -713,7 +711,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         width=2,
     )
 
-    # 「おまさい」含む全テーマで称号文字色を赤系（red_accent）に統一！
+    # 全テーマ共通で赤系（red_accent）に統一
     title_text_color = red_accent
     draw_text_with_outline(
         draw, (70, 170), title, font_title, title_text_color, outline_range=0
