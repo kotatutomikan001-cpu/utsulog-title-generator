@@ -316,7 +316,7 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（「げん」＆「うつろ」除外版）
+# 3. 称号生成関数（「ーーー」等記号除外強化版）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
@@ -364,7 +364,7 @@ def generate_nickname(comments):
     ]
 
     stop_words = {
-        "げん",  # ★ 「げん」を除外リストに追加！
+        "げん",
         "うつろ",
         "流石",
         "さすが",
@@ -428,6 +428,7 @@ def generate_nickname(comments):
         "ナイ形容詞語幹",
     ]
 
+    # ★ 横線系（ー, ―, ─, ━, ─, ~）も含めて徹底的に事前除去する記号パターン
     symbol_pattern = re.compile(
         "["
         "\U0001f300-\U0001f9ff"
@@ -435,10 +436,13 @@ def generate_nickname(comments):
         "\u2600-\u27bf"
         "\ufe0f"
         "\u2744"
-        "…‥・―～〜!！?？♪★☆◇◆◎○●"
+        "…‥・―─━ー～〜!！?？♪★☆◇◆◎○●"
         "]+",
         flags=re.UNICODE,
     )
+
+    # ★ 記号だけで構成されている単語を弾く正規表現（ダッシュ・ハイフン・長音記号の連続を全てガード）
+    symbol_only_pattern = re.compile(r"^[\.\…\―\─\━\─\ー\～\〜\-\_]+$")
 
     for comment in comments:
         working_comment = symbol_pattern.sub(" ", comment)
@@ -472,7 +476,7 @@ def generate_nickname(comments):
                         len(word) > 1
                         and word not in stop_words
                         and not symbol_pattern.search(word)
-                        and not re.match(r"^[\.\…\―\─\～\〜]+$", word)
+                        and not symbol_only_pattern.match(word)
                         and not re.match(r"^[wｗWＷ]+$", word)
                     ):
                         words.append(word)
@@ -482,7 +486,7 @@ def generate_nickname(comments):
                     len(word) > 1
                     and word not in stop_words
                     and not symbol_pattern.search(word)
-                    and not re.match(r"^[\.\…\―\─\～\〜]+$", word)
+                    and not symbol_only_pattern.match(word)
                     and not re.match(r"^[wｗWＷ]+$", word)
                 ):
                     words.append(word)
