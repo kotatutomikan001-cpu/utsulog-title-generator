@@ -204,7 +204,7 @@ st.markdown(
 
 
 # -------------------------------------------------------------
-# 2. コメント取得関数（キャッシュ＆同時起動制限・エラーハンドリング強化版）
+# 2. コメント取得関数（プログレス表示復元＆同時起動制限版）
 # -------------------------------------------------------------
 @st.cache_data(ttl=600, show_spinner=False)
 def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
@@ -263,9 +263,20 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
             prev_count = 0
             same_count_turns = 0
 
+            # ★ 件数とプログレスバーの表示領域を作成
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+
             for i in range(max_scrolls):
                 comment_elements = page.query_selector_all("p.text-slate-700")
                 current_count = len(comment_elements)
+
+                # ★ プログレスバーと「〇〇件取得済み」メッセージを更新
+                progress = int(((i + 1) / max_scrolls) * 100)
+                progress_bar.progress(progress)
+                status_text.text(
+                    f"データ収集・スクロール中... ({current_count}件取得済み)"
+                )
 
                 if current_count == 0:
                     time.sleep(1.0)
@@ -291,12 +302,14 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
                 if text and text not in comments:
                     comments.append(text)
 
+            # ★ 処理完了後にプログレス表示をクリア
+            status_text.empty()
+            progress_bar.empty()
             browser.close()
     except Exception as e:
         print(f"fetch_comments_web error: {e}")
         return []
     finally:
-        # 処理終了後、必ず次のリクエストのためにロックを解除する
         browser_semaphore.release()
 
     return comments
