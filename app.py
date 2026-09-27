@@ -316,7 +316,7 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（「ーーー」等記号除外強化版）
+# 3. 称号生成関数（名詞抽出感度拡大版）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
@@ -418,17 +418,28 @@ def generate_nickname(comments):
         "〜",
         "～",
         "草",
+        "かな",
+        "たら",
+        "から",
+        "まで",
+        "だけ",
+        "ほど",
+        "くらい",
+        "ぐらい",
     }
 
+    # ★ 抽出を許可する名詞の細分類を拡大（一般名詞、固有名詞、サ変接続、形容動詞語幹、副詞可能、ナイ形容詞語幹等）
     allowed_subcategories = [
         "一般",
         "固有名詞",
         "サ変接続",
         "形容動詞語幹",
         "ナイ形容詞語幹",
+        "副詞可能",
+        "接尾",
     ]
 
-    # ★ 横線系（ー, ―, ─, ━, ─, ~）も含めて徹底的に事前除去する記号パターン
+    # ★ 記号判定パターン
     symbol_pattern = re.compile(
         "["
         "\U0001f300-\U0001f9ff"
@@ -441,7 +452,6 @@ def generate_nickname(comments):
         flags=re.UNICODE,
     )
 
-    # ★ 記号だけで構成されている単語を弾く正規表現（ダッシュ・ハイフン・長音記号の連続を全てガード）
     symbol_only_pattern = re.compile(r"^[\.\…\―\─\━\─\ー\～\〜\-\_]+$")
 
     for comment in comments:
@@ -470,7 +480,12 @@ def generate_nickname(comments):
             pos_sub = pos_details[1]
 
             if pos_main == "名詞" and pos_sub != "数":
-                if pos_sub in allowed_subcategories or pos_sub == "*":
+                # 非自立名詞（「こと」「もの」等）や数詞以外の幅広い名詞を対象にする
+                if (
+                    pos_sub in allowed_subcategories
+                    or pos_sub == "*"
+                    or pos_sub.startswith("一般")
+                ):
                     word = token.base_form.strip()
                     if (
                         len(word) > 1
@@ -551,7 +566,7 @@ def generate_nickname(comments):
             f"【{top1}の空に想いを馳せ{top2}の章を詠む英雄】",
             f"【{top1}の書庫に深く潜り{top2}の真理を極めし執筆者】",
             f"【{top1}の書巻を広げ{top2}の領域を統べる主】",
-            f"【{top1}を凍てつく筆先に込め{top2}を描く者】",
+            f"【{top1}を凍てつく筆気に込め{top2}を描く者】",
             f"【{top1}の図書室で静かに{top2}の解を導く英雄】",
             f"【{top1}を原稿用紙に走らせ{top2}を解き明かす覇王】",
             f"【{top1}を万年筆に宿し{top2}の歴史を紡ぐ主】",
