@@ -316,7 +316,7 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（w/ｗフィルタリング対応版）
+# 3. 称号生成関数（「うつろ」単体除外版）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
@@ -364,6 +364,7 @@ def generate_nickname(comments):
     ]
 
     stop_words = {
+        "うつろ",  # ★ 単体の「うつろ」を除外（※ミニうつろなどはcustom_keywordsで残るよ）
         "流石",
         "さすが",
         "すか",
