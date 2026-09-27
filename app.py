@@ -316,7 +316,7 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数（名詞抽出感度拡大版）
+# 3. 称号生成関数
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
@@ -428,7 +428,6 @@ def generate_nickname(comments):
         "ぐらい",
     }
 
-    # ★ 抽出を許可する名詞の細分類を拡大（一般名詞、固有名詞、サ変接続、形容動詞語幹、副詞可能、ナイ形容詞語幹等）
     allowed_subcategories = [
         "一般",
         "固有名詞",
@@ -439,7 +438,6 @@ def generate_nickname(comments):
         "接尾",
     ]
 
-    # ★ 記号判定パターン
     symbol_pattern = re.compile(
         "["
         "\U0001f300-\U0001f9ff"
@@ -480,7 +478,6 @@ def generate_nickname(comments):
             pos_sub = pos_details[1]
 
             if pos_main == "名詞" and pos_sub != "数":
-                # 非自立名詞（「こと」「もの」等）や数詞以外の幅広い名詞を対象にする
                 if (
                     pos_sub in allowed_subcategories
                     or pos_sub == "*"
@@ -566,7 +563,7 @@ def generate_nickname(comments):
             f"【{top1}の空に想いを馳せ{top2}の章を詠む英雄】",
             f"【{top1}の書庫に深く潜り{top2}の真理を極めし執筆者】",
             f"【{top1}の書巻を広げ{top2}の領域を統べる主】",
-            f"【{top1}を凍てつく筆気に込め{top2}を描く者】",
+            f"【{top1}を凍てつく筆先に込め{top2}を描く者】",
             f"【{top1}の図書室で静かに{top2}の解を導く英雄】",
             f"【{top1}を原稿用紙に走らせ{top2}を解き明かす覇王】",
             f"【{top1}を万年筆に宿し{top2}の歴史を紡ぐ主】",
@@ -631,7 +628,7 @@ def draw_text_with_outline(
 
 
 # -------------------------------------------------------------
-# ★ テーマ別名刺画像生成関数（「おまさい」称号枠薄い水色版）
+# ★ テーマ別名刺画像生成関数（「言葉ランキング」表記変更版）
 # -------------------------------------------------------------
 def create_card_image(author_name, title, top_words, theme="おまさい"):
     width, height = 1000, 560
@@ -768,11 +765,11 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         draw, (70, 170), title, font_title, title_text_color, outline_range=0
     )
 
-    # 4. ランキング見出し
+    # 4. ランキング見出し（★「言葉ランキング」に変更！）
     draw_text_with_outline(
         draw,
         (50, 265),
-        "◇ 特徴的な名詞ランキング",
+        "◇ 特徴的な言葉ランキング",
         font_rank_head,
         text_dark,
         outline_color=outline_c,
@@ -887,7 +884,7 @@ if "title" in st.session_state:
     st.header(f":red[{title}]")
     st.markdown("---")
 
-    st.subheader("❄️ 特徴的な名詞ランキング 🖋️（Top 5）")
+    st.subheader("❄️ 特徴的な言葉ランキング 🖋️（Top 5）")
 
     current_rank = 1
     for idx, (word, count) in enumerate(top_words, 0):
