@@ -303,7 +303,7 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数
+# 3. 称号生成関数（w/ｗフィルタリング対応版）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
@@ -402,6 +402,7 @@ def generate_nickname(comments):
         "―",
         "〜",
         "～",
+        "草",
     }
 
     allowed_subcategories = [
@@ -457,6 +458,7 @@ def generate_nickname(comments):
                         and word not in stop_words
                         and not symbol_pattern.search(word)
                         and not re.match(r"^[\.\…\―\─\～\〜]+$", word)
+                        and not re.match(r"^[wｗWＷ]+$", word)
                     ):
                         words.append(word)
             elif pos_main in ["カスタム名詞", "未知語"]:
@@ -466,6 +468,7 @@ def generate_nickname(comments):
                     and word not in stop_words
                     and not symbol_pattern.search(word)
                     and not re.match(r"^[\.\…\―\─\～\〜]+$", word)
+                    and not re.match(r"^[wｗWＷ]+$", word)
                 ):
                     words.append(word)
 
