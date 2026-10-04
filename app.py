@@ -323,6 +323,7 @@ def generate_nickname(comments):
     words = []
 
     custom_keywords = [
+        "アーカイブ",  # ★ 追加！
         "シュウォッチ",
         "連打測定",
         "スパチュンパートナーズ",
@@ -364,6 +365,7 @@ def generate_nickname(comments):
     ]
 
     stop_words = {
+        "カイブ",  # ★ 追加！
         "げん",
         "うつろ",
         "流石",
@@ -563,7 +565,7 @@ def generate_nickname(comments):
             f"【{top1}の空に想いを馳せ{top2}の章を詠む英雄】",
             f"【{top1}の書庫に深く潜り{top2}の真理を極めし執筆者】",
             f"【{top1}の書巻を広げ{top2}の領域を統べる主】",
-            f"【{top1}を凍てつく筆先に込め{top2}を描く者】",
+            f"【{top1}を凍てつく筆気に込め{top2}を描く者】",
             f"【{top1}の図書室で静かに{top2}の解を導く英雄】",
             f"【{top1}を原稿用紙に走らせ{top2}を解き明かす覇王】",
             f"【{top1}を万年筆に宿し{top2}の歴史を紡ぐ主】",
@@ -765,7 +767,7 @@ def create_card_image(author_name, title, top_words, theme="おまさい"):
         draw, (70, 170), title, font_title, title_text_color, outline_range=0
     )
 
-    # 4. ランキング見出し（★「言葉ランキング」に変更！）
+    # 4. ランキング見出し
     draw_text_with_outline(
         draw,
         (50, 265),
