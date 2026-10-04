@@ -316,14 +316,15 @@ def fetch_comments_web(author_name, max_scrolls=5, scroll_delay=0.5):
 
 
 # -------------------------------------------------------------
-# 3. 称号生成関数
+# 3. 称号生成関数（アーカイブ表記ゆれ＆抽出強化版）
 # -------------------------------------------------------------
 def generate_nickname(comments):
     tokenizer = Tokenizer()
     words = []
 
     custom_keywords = [
-        "アーカイブ",  # ★ 追加！
+        "アーカイブ",
+        "あーかいぶ",  # ひらがな表記も考慮
         "シュウォッチ",
         "連打測定",
         "スパチュンパートナーズ",
@@ -365,7 +366,7 @@ def generate_nickname(comments):
     ]
 
     stop_words = {
-        "カイブ",  # ★ 追加！
+        "カイブ",  # 分割された「カイブ」は除外
         "げん",
         "うつろ",
         "流石",
@@ -460,13 +461,18 @@ def generate_nickname(comments):
         for ck in custom_keywords:
             if ck in working_comment:
                 count_ck = working_comment.count(ck)
+                # 「あーかいぶ」も「アーカイブ」に統一
                 target_word = (
-                    "お姉ちゃん"
-                    if ck == "姉ちゃん"
+                    "アーカイブ"
+                    if ck in ["アーカイブ", "あーかいぶ"]
                     else (
-                        "スパチュンパートナーズ"
-                        if ck == "スパチュンパートナー"
-                        else ck
+                        "お姉ちゃん"
+                        if ck == "姉ちゃん"
+                        else (
+                            "スパチュンパートナーズ"
+                            if ck == "スパチュンパートナー"
+                            else ck
+                        )
                     )
                 )
 
@@ -486,6 +492,10 @@ def generate_nickname(comments):
                     or pos_sub.startswith("一般")
                 ):
                     word = token.base_form.strip()
+                    # 「カイブ」や分解されたアーカイブ表記も「アーカイブ」としてレスキュー
+                    if word in ["アーカイブ", "あーかいぶ"]:
+                        word = "アーカイブ"
+
                     if (
                         len(word) > 1
                         and word not in stop_words
@@ -496,6 +506,9 @@ def generate_nickname(comments):
                         words.append(word)
             elif pos_main in ["カスタム名詞", "未知語"]:
                 word = token.surface.strip()
+                if word in ["アーカイブ", "あーかいぶ"]:
+                    word = "アーカイブ"
+
                 if (
                     len(word) > 1
                     and word not in stop_words
